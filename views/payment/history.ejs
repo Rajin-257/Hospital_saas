@@ -1,0 +1,421 @@
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <h2 class="h4 fw-bold">Payment History</h2>
+    <p class="text-muted mb-0">View all your past and current payments</p>
+  </div>
+  <a href="/payment/subscription" class="btn btn-primary">
+    <i class="fas fa-plus-circle me-2"></i> New Payment
+  </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-primary bg-gradient text-white p-3 rounded">
+            <i class="fas fa-money-bill-wave fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Spent</h6>
+            <h3 class="fw-bold mb-0">৳<%= payments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0).toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-success bg-gradient text-white p-3 rounded">
+            <i class="fas fa-check-circle fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Completed</h6>
+            <h3 class="fw-bold mb-0"><%= payments.filter(p => p.status === 'completed').length %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-warning bg-gradient text-white p-3 rounded">
+            <i class="fas fa-clock fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Pending</h6>
+            <h3 class="fw-bold mb-0"><%= payments.filter(p => p.status === 'pending').length %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-danger bg-gradient text-white p-3 rounded">
+            <i class="fas fa-times-circle fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Failed/Refunded</h6>
+            <h3 class="fw-bold mb-0"><%= payments.filter(p => p.status === 'failed' || p.status === 'refunded').length %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment History Table -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Payment Transactions</h5>
+      <div class="d-flex gap-2">
+        <form action="/payment/history" method="GET" class="d-flex">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search payments..." name="search">
+            <button class="btn btn-outline-primary" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </form>
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+            <i class="fas fa-filter me-1"></i> Filter
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+            <li><a class="dropdown-item" href="/payment/history">All Payments</a></li>
+            <li><a class="dropdown-item" href="/payment/history?status=completed">Completed</a></li>
+            <li><a class="dropdown-item" href="/payment/history?status=pending">Pending</a></li>
+            <li><a class="dropdown-item" href="/payment/history?status=failed">Failed</a></li>
+            <li><a class="dropdown-item" href="/payment/history?status=refunded">Refunded</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <% if(payments.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th>Transaction ID</th>
+              <th>Database</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payments.forEach(payment => { %>
+              <tr>
+                <td><%= payment.transactionId %></td>
+                <td><%= payment.database.domain %></td>
+                <td>৳<%= parseFloat(payment.amount).toLocaleString() %></td>
+                <td><%= moment(payment.paymentDate).format('DD MMM YYYY') %></td>
+                <td>
+                  <% if(payment.paymentMethod === 'bkash') { %>
+                    <img src="/img/bkash.png" alt="bKash" height="20">
+                  <% } else if(payment.paymentMethod === 'nagad') { %>
+                    <img src="/img/nagad.png" alt="Nagad" height="20">
+                  <% } else if(payment.paymentMethod === 'rocket') { %>
+                    <img src="/img/rocket.png" alt="Rocket" height="20">
+                  <% } else { %>
+                    <i class="fas fa-credit-card me-1"></i> Card
+                  <% } %>
+                </td>
+                <td>
+                  <% if(payment.status === 'completed') { %>
+                    <span class="badge bg-success">Completed</span>
+                  <% } else if(payment.status === 'pending') { %>
+                    <span class="badge bg-warning">Pending</span>
+                  <% } else if(payment.status === 'failed') { %>
+                    <span class="badge bg-danger">Failed</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Refunded</span>
+                  <% } %>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#paymentModal<%= payment.id %>">
+                    <i class="fas fa-eye"></i> View
+                  </button>
+                  
+                  <!-- Payment Modal -->
+                  <div class="modal fade" id="paymentModal<%= payment.id %>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Payment Details</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="text-center mb-4">
+                            <% if(payment.status === 'completed') { %>
+                              <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                              </div>
+                              <h5 class="mb-1">Payment Successful</h5>
+                              <p class="text-muted mb-0">Transaction was completed successfully</p>
+                            <% } else if(payment.status === 'pending') { %>
+                              <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-clock fa-2x"></i>
+                              </div>
+                              <h5 class="mb-1">Payment Pending</h5>
+                              <p class="text-muted mb-0">Transaction is being processed</p>
+                            <% } else if(payment.status === 'failed') { %>
+                              <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-times-circle fa-2x"></i>
+                              </div>
+                              <h5 class="mb-1">Payment Failed</h5>
+                              <p class="text-muted mb-0">Transaction could not be completed</p>
+                            <% } else { %>
+                              <div class="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-undo fa-2x"></i>
+                              </div>
+                              <h5 class="mb-1">Payment Refunded</h5>
+                              <p class="text-muted mb-0">Transaction amount has been refunded</p>
+                            <% } %>
+                          </div>
+                          
+                          <div class="row mb-3">
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Transaction ID</p>
+                              <p class="fw-bold mb-0"><%= payment.transactionId %></p>
+                            </div>
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Date & Time</p>
+                              <p class="fw-bold mb-0"><%= moment(payment.paymentDate).format('DD MMM YYYY HH:mm:ss') %></p>
+                            </div>
+                          </div>
+                          
+                          <div class="row mb-3">
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Amount</p>
+                              <p class="fw-bold mb-0">৳<%= parseFloat(payment.amount).toLocaleString() %></p>
+                            </div>
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Payment Method</p>
+                              <p class="fw-bold mb-0"><%= payment.paymentMethod.charAt(0).toUpperCase() + payment.paymentMethod.slice(1) %></p>
+                            </div>
+                          </div>
+                          
+                          <div class="row mb-3">
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Database</p>
+                              <p class="fw-bold mb-0"><%= payment.database.domain %></p>
+                            </div>
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Extension Period</p>
+                              <p class="fw-bold mb-0"><%= payment.extensionDays %> days</p>
+                            </div>
+                          </div>
+                          
+                          <% if(payment.status === 'completed') { %>
+                            <div class="row mb-3">
+                              <div class="col-md-6">
+                                <p class="text-muted mb-1">Old Expiry Date</p>
+                                <p class="fw-bold mb-0">
+                                  <%= moment(payment.database.expiryDate).subtract(payment.extensionDays, 'days').format('DD MMM YYYY') %>
+                                </p>
+                              </div>
+                              <div class="col-md-6">
+                                <p class="text-muted mb-1">New Expiry Date</p>
+                                <p class="fw-bold mb-0">
+                                  <%= moment(payment.database.expiryDate).format('DD MMM YYYY') %>
+                                </p>
+                              </div>
+                            </div>
+                          <% } %>
+                          
+                          <hr>
+                          
+                          <div class="row">
+                            <div class="col-md-12">
+                              <h6>Receipt Information</h6>
+                              <table class="table table-sm">
+                                <tbody>
+                                  <tr>
+                                    <td>Subscription Fee</td>
+                                    <td class="text-end">৳<%= parseFloat(payment.amount).toLocaleString() %></td>
+                                  </tr>
+                                  <tr>
+                                    <td>VAT & Tax</td>
+                                    <td class="text-end">৳0.00</td>
+                                  </tr>
+                                  <tr class="fw-bold">
+                                    <td>Total</td>
+                                    <td class="text-end">৳<%= parseFloat(payment.amount).toLocaleString() %></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          <button type="button" class="btn btn-primary" onclick="printReceipt(`<%= payment.id %>`)">
+                            <i class="fas fa-print me-2"></i> Print Receipt
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5">
+        <i class="fas fa-file-invoice-dollar fa-4x text-muted mb-3"></i>
+        <h4>No Payments Found</h4>
+        <p class="text-muted">No payment records found in the system</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Monthly Spending Chart -->
+<div class="card border-0 shadow-sm mt-4">
+  <div class="card-header bg-white py-3">
+    <h5 class="mb-0">Monthly Spending</h5>
+  </div>
+  <div class="card-body">
+    <canvas id="spendingChart" height="300"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Monthly Spending Chart
+    const ctx = document.getElementById('spendingChart').getContext('2d');
+    
+    // Sample data - would come from backend in a real app
+    const last6Months = Array.from({length: 6}, (_, i) => {
+      const month = new Date();
+      month.setMonth(month.getMonth() - i);
+      return month.toLocaleString('default', { month: 'short' });
+    }).reverse();
+    
+    const spendingData = [
+      `<%= Array.from({length: 6}, () => Math.floor(Math.random() * 2000) + 1000).join(',') %>`
+    ];
+    
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: last6Months,
+        datasets: [{
+          label: 'Monthly Spending (BDT)',
+          data: spendingData,
+          backgroundColor: 'rgba(13, 110, 253, 0.6)',
+          borderColor: 'rgba(13, 110, 253, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '৳' + value.toLocaleString();
+              }
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return 'Spending: ৳' + context.raw.toLocaleString();
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+  
+  // Print receipt
+  function printReceipt(paymentId) {
+    const modalContent = document.querySelector(`#paymentModal${paymentId} .modal-body`).innerHTML;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Payment Receipt</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+        <style>
+          body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+          }
+          .receipt-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+          }
+          .receipt-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #666;
+            font-size: 14px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1 class="receipt-title">Payment Receipt</h1>
+          <p class="receipt-subtitle">Hospital DBMS</p>
+        </div>
+        
+        <div class="content">
+          ${modalContent}
+        </div>
+        
+        <div class="footer">
+          <p>Thank you for your payment!</p>
+          <p>If you have any questions, please contact support@dbms.com</p>
+          <p>© ${new Date().getFullYear()} Hospital DBMS. All rights reserved.</p>
+        </div>
+      </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // Print after a slight delay to ensure the content is loaded
+    setTimeout(() => {
+      printWindow.print();
+      // printWindow.close();
+    }, 500);
+  }
+</script>

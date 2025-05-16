@@ -1,0 +1,463 @@
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <h2 class="h4 fw-bold">My Referrals</h2>
+    <p class="text-muted mb-0">Manage and view your referrals</p>
+  </div>
+</div>
+
+<!-- Referral Overview Card -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body p-4">
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <h5 class="mb-3">Your Referral Code</h5>
+        <div class="d-flex align-items-center">
+          <div class="flex-grow-1">
+            <div class="input-group">
+              <input type="text" class="form-control form-control-lg" value="<%= referralCode %>" id="referralCode" readonly>
+              <button class="btn btn-primary" type="button" onclick="copyReferralCode()">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="text-muted mt-3">Share this code with hospitals or healthcare facilities to earn commission on their payments</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-primary bg-gradient text-white p-3 rounded">
+            <i class="fas fa-users fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Referrals</h6>
+            <h3 class="fw-bold mb-0"><%= referrals.length %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-success bg-gradient text-white p-3 rounded">
+            <i class="fas fa-database fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Databases</h6>
+            <h3 class="fw-bold mb-0"><%= databases.length %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-warning bg-gradient text-white p-3 rounded">
+            <i class="fas fa-money-bill-wave fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Payments</h6>
+            <h3 class="fw-bold mb-0"><%= payments.length %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-info bg-gradient text-white p-3 rounded">
+            <i class="fas fa-hand-holding-usd fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Commission</h6>
+            <h3 class="fw-bold mb-0">৳<%= commissions.reduce((sum, commission) => sum + parseFloat(commission.amount), 0).toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs Navigation -->
+<ul class="nav nav-tabs mb-4" id="referralTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="referrals-tab" data-bs-toggle="tab" data-bs-target="#referrals" type="button" role="tab" aria-controls="referrals" aria-selected="true">
+      <i class="fas fa-users me-2"></i> Referrals
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button" role="tab" aria-controls="payments" aria-selected="false">
+      <i class="fas fa-credit-card me-2"></i> Payments
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="commissions-tab" data-bs-toggle="tab" data-bs-target="#commissions" type="button" role="tab" aria-controls="commissions" aria-selected="false">
+      <i class="fas fa-hand-holding-usd me-2"></i> Commissions
+    </button>
+  </li>
+</ul>
+
+<!-- Tabs Content -->
+<div class="tab-content" id="referralTabsContent">
+  <!-- Referrals Tab -->
+  <div class="tab-pane fade show active" id="referrals" role="tabpanel" aria-labelledby="referrals-tab">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">All Referrals</h5>
+          <div class="d-flex gap-2">
+            <form class="d-flex">
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search referrals..." id="referralSearch">
+                <button class="btn btn-outline-primary" type="button">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <% if(referrals.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="referralsTable">
+              <thead class="bg-light">
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Join Date</th>
+                  <th>Databases</th>
+                  <th>Payments</th>
+                  <th>Commission</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% referrals.forEach(referral => { %>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                          <%= referral.fullName.charAt(0).toUpperCase() %>
+                        </div>
+                        <div>
+                          <h6 class="mb-0"><%= referral.fullName %></h6>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= referral.email %></td>
+                    <td><%= moment(referral.createdAt).format('DD MMM YYYY') %></td>
+                    <td>
+                      <% 
+                        const referralDatabases = databases.filter(db => db.user.id === referral.id);
+                      %>
+                      <span class="badge bg-primary"><%= referralDatabases.length %></span>
+                    </td>
+                    <td>
+                      <% 
+                        const referralPayments = payments.filter(payment => payment.user.id === referral.id);
+                      %>
+                      <span class="badge bg-success"><%= referralPayments.length %></span>
+                    </td>
+                    <td>
+                      <% 
+                        const referralCommissions = commissions.filter(commission => commission.referredUserId === referral.id);
+                        const totalCommission = referralCommissions.reduce((sum, commission) => sum + parseFloat(commission.amount), 0);
+                      %>
+                      ৳<%= totalCommission.toLocaleString() %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5">
+            <i class="fas fa-users fa-4x text-muted mb-3"></i>
+            <h4>No Referrals Yet</h4>
+            <p class="text-muted">Share your referral code to start earning commissions</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Payments Tab -->
+  <div class="tab-pane fade" id="payments" role="tabpanel" aria-labelledby="payments-tab">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Referral Payments</h5>
+          <div class="d-flex gap-2">
+            <form class="d-flex">
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search payments..." id="paymentSearch">
+                <button class="btn btn-outline-primary" type="button">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <% if(payments.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="paymentsTable">
+              <thead class="bg-light">
+                <tr>
+                  <th>User</th>
+                  <th>Database</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Commission</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% payments.forEach(payment => { %>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                          <%= payment.user.fullName.charAt(0).toUpperCase() %>
+                        </div>
+                        <div>
+                          <h6 class="mb-0"><%= payment.user.fullName %></h6>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= payment.database.domain %></td>
+                    <td>৳<%= parseFloat(payment.amount).toLocaleString() %></td>
+                    <td><%= moment(payment.paymentDate).format('DD MMM YYYY') %></td>
+                    <td><%= payment.paymentMethod %></td>
+                    <td>
+                      <% if(payment.status === 'completed') { %>
+                        <span class="badge bg-success">Completed</span>
+                      <% } else if(payment.status === 'pending') { %>
+                        <span class="badge bg-warning">Pending</span>
+                      <% } else if(payment.status === 'failed') { %>
+                        <span class="badge bg-danger">Failed</span>
+                      <% } else { %>
+                        <span class="badge bg-secondary">Refunded</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% 
+                        const relatedCommission = commissions.find(c => c.paymentId === payment.id);
+                        if(relatedCommission) { 
+                      %>
+                        ৳<%= parseFloat(relatedCommission.amount).toLocaleString() %>
+                      <% } else { %>
+                        -
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5">
+            <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
+            <h4>No Payments Yet</h4>
+            <p class="text-muted">Your referrals haven't made any payments yet</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Commissions Tab -->
+  <div class="tab-pane fade" id="commissions" role="tabpanel" aria-labelledby="commissions-tab">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Earned Commissions</h5>
+          <div class="d-flex gap-2">
+            <form class="d-flex">
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search commissions..." id="commissionSearch">
+                <button class="btn btn-outline-primary" type="button">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <% if(commissions.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="commissionsTable">
+              <thead class="bg-light">
+                <tr>
+                  <th>Referred User</th>
+                  <th>Payment</th>
+                  <th>Amount</th>
+                  <th>Rate</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% commissions.forEach(commission => { %>
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                          <%= commission.referredUser.fullName.charAt(0).toUpperCase() %>
+                        </div>
+                        <div>
+                          <h6 class="mb-0"><%= commission.referredUser.fullName %></h6>
+                        </div>
+                      </div>
+                    </td>
+                    <td>৳<%= parseFloat(commission.payment.amount).toLocaleString() %></td>
+                    <td>৳<%= parseFloat(commission.amount).toLocaleString() %></td>
+                    <td><%= commission.percentage %>%</td>
+                    <td><%= moment(commission.createdAt).format('DD MMM YYYY') %></td>
+                    <td>
+                      <% if(commission.status === 'paid') { %>
+                        <span class="badge bg-success">Paid</span>
+                      <% } else if(commission.status === 'pending') { %>
+                        <span class="badge bg-warning">Pending</span>
+                      <% } else { %>
+                        <span class="badge bg-danger">Cancelled</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5">
+            <i class="fas fa-hand-holding-usd fa-4x text-muted mb-3"></i>
+            <h4>No Commissions Yet</h4>
+            <p class="text-muted">You haven't earned any commissions yet</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="card border-0 shadow-sm mt-4">
+  <div class="card-header bg-white py-3">
+    <h5 class="mb-0">How Referrals Work</h5>
+  </div>
+  <div class="card-body">
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="text-center">
+          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i class="fas fa-share-alt fa-2x"></i>
+          </div>
+          <h5>1. Share</h5>
+          <p class="text-muted">Share your unique referral code with hospitals or healthcare providers</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-center">
+          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i class="fas fa-user-plus fa-2x"></i>
+          </div>
+          <h5>2. Registration</h5>
+          <p class="text-muted">They register using your referral code</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-center">
+          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i class="fas fa-credit-card fa-2x"></i>
+          </div>
+          <h5>3. Payment</h5>
+          <p class="text-muted">When they make payments, you earn commission</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="text-center">
+          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+            <i class="fas fa-money-bill-wave fa-2x"></i>
+          </div>
+          <h5>4. Earn</h5>
+          <p class="text-muted">You earn <%= user.commissionRate %>% on all their payments</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyReferralCode() {
+    const codeInput = document.getElementById('referralCode');
+    codeInput.select();
+    codeInput.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand('copy');
+    
+    alert('Referral code copied to clipboard!');
+  }
+  
+  function copyReferralLink() {
+    const linkInput = document.getElementById('referralLink');
+    linkInput.select();
+    linkInput.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand('copy');
+    
+    alert('Referral link copied to clipboard!');
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality for referrals
+    const referralSearch = document.getElementById('referralSearch');
+    const referralsTable = document.getElementById('referralsTable');
+    
+    if(referralSearch && referralsTable) {
+      referralSearch.addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = referralsTable.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        
+        for(let i = 0; i < rows.length; i++) {
+          const name = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+          const email = rows[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+          
+          if(name.includes(searchValue) || email.includes(searchValue)) {
+            rows[i].style.display = '';
+          } else {
+            rows[i].style.display = 'none';
+          }
+        }
+      });
+    }
+    
+    // Similar search for payments and commissions tables
+    const paymentSearch = document.getElementById('paymentSearch');
+    const paymentsTable = document.getElementById('paymentsTable');
+    
+    if(paymentSearch && paymentsTable) {
+      // Similar implementation
+    }
+    
+    const commissionSearch = document.getElementById('commissionSearch');
+    const commissionsTable = document.getElementById('commissionsTable');
+    
+    if(commissionSearch && commissionsTable) {
+      // Similar implementation
+    }
+  });
+</script>

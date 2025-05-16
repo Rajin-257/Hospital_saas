@@ -1,0 +1,200 @@
+<div class="mb-4">
+  <h2 class="h4 fw-bold">Executive Dashboard</h2>
+  <p class="text-muted">Welcome back, <%= user.fullName %>!</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-primary bg-gradient text-white p-3 rounded">
+            <i class="fas fa-hand-holding-usd fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Commission</h6>
+            <h3 class="fw-bold mb-0">৳<%= totalCommission.toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-success bg-gradient text-white p-3 rounded">
+            <i class="fas fa-money-bill-wave fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Paid Commission</h6>
+            <h3 class="fw-bold mb-0">৳<%= paidCommission.toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-warning bg-gradient text-white p-3 rounded">
+            <i class="fas fa-hourglass-half fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Pending Commission</h6>
+            <h3 class="fw-bold mb-0">৳<%= pendingCommission.toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-info bg-gradient text-white p-3 rounded">
+            <i class="fas fa-users fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Referrals</h6>
+            <h3 class="fw-bold mb-0"><%= referralCount %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Referral Code Card -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Your Referral Code</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-4">
+          <div class="flex-grow-1">
+            <p class="text-muted mb-2">Share this code with others to earn commission</p>
+            <div class="input-group">
+              <input type="text" class="form-control form-control-lg bg-light" value="<%= user.referralCode %>" id="referralCode" readonly>
+              <button class="btn btn-primary" type="button" onclick="copyReferralCode()">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-light p-3 rounded">
+          <h6 class="mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>How it works</h6>
+          <ol class="mb-0">
+            <li class="mb-2">Share your referral code with hospitals or healthcare facilities</li>
+            <li class="mb-2">When they register using your code, they become your referral</li>
+            <li>You earn <strong><%= user.commissionRate %>%</strong> commission on all their payments</li>
+          </ol>
+        </div>
+      </div>
+      <div class="card-footer bg-white border-0">
+        <a href="/executive/referrals" class="btn btn-outline-primary w-100">
+          <i class="fas fa-users me-2"></i> View All Referrals
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recent Commissions -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Recent Commissions</h5>
+          <a href="/executive/commissions" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+      </div>
+      <div class="card-body">
+        <% if(recentCommissions.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Referral</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentCommissions.forEach(commission => { %>
+                  <tr>
+                    <td><%= commission.referredUser.fullName %></td>
+                    <td>৳<%= parseFloat(commission.amount).toLocaleString() %></td>
+                    <td><%= moment(commission.createdAt).format('DD MMM YYYY') %></td>
+                    <td>
+                      <% if(commission.status === 'paid') { %>
+                        <span class="badge bg-success">Paid</span>
+                      <% } else if(commission.status === 'pending') { %>
+                        <span class="badge bg-warning">Pending</span>
+                      <% } else { %>
+                        <span class="badge bg-danger">Cancelled</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-4">
+            <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No commission records found</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card border-0 shadow-sm mt-4">
+  <div class="card-header bg-white py-3">
+    <h5 class="mb-0">Quick Actions</h5>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <a href="/database/list" class="btn btn-light btn-lg w-100 d-flex align-items-center justify-content-center p-3">
+          <i class="fas fa-database me-2"></i> My Databases
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="/payment/subscription" class="btn btn-light btn-lg w-100 d-flex align-items-center justify-content-center p-3">
+          <i class="fas fa-credit-card me-2"></i> Extend Subscription
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="/executive/referrals" class="btn btn-light btn-lg w-100 d-flex align-items-center justify-content-center p-3">
+          <i class="fas fa-user-plus me-2"></i> My Referrals
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="/executive/profile" class="btn btn-light btn-lg w-100 d-flex align-items-center justify-content-center p-3">
+          <i class="fas fa-user-circle me-2"></i> My Profile
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyReferralCode() {
+    const codeInput = document.getElementById('referralCode');
+    codeInput.select();
+    codeInput.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand('copy');
+    
+    // Show toast or alert
+    alert('Referral code copied to clipboard!');
+  }
+</script>

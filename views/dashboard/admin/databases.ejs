@@ -1,0 +1,173 @@
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <h2 class="h4 fw-bold">Database Management</h2>
+    <p class="text-muted mb-0">Manage all databases in the system</p>
+  </div>
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createDatabaseModal">
+    <i class="fas fa-plus-circle me-2"></i> Create Database
+  </button>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">All Databases</h5>
+      <div class="d-flex gap-2">
+        <form action="/admin/databases" method="GET" class="d-flex">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search databases..." name="search">
+            <button class="btn btn-outline-primary" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </form>
+        <div class="dropdown">
+          <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+            <i class="fas fa-filter me-1"></i> Filter
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+            <li><a class="dropdown-item" href="/admin/databases">All Databases</a></li>
+            <li><a class="dropdown-item" href="/admin/databases?status=active">Active</a></li>
+            <li><a class="dropdown-item" href="/admin/databases?status=inactive">Inactive</a></li>
+            <li><a class="dropdown-item" href="/admin/databases?status=expiring">Expiring Soon</a></li>
+            <li><a class="dropdown-item" href="/admin/databases?status=expired">Expired</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <% if(databases.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Domain</th>
+              <th scope="col">Owner</th>
+              <th scope="col">Created</th>
+              <th scope="col">Expiry</th>
+              <th scope="col">Status</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% databases.forEach(db => { %>
+              <tr>
+                <td><%= db.name %></td>
+                <td><%= db.domain %></td>
+                <td>
+                  <a href="/admin/users/<%= db.user.id %>" class="text-decoration-none">
+                    <%= db.user.fullName %>
+                  </a>
+                </td>
+                <td><%= moment(db.createdAt).format('DD MMM YYYY') %></td>
+                <td>
+                  <% 
+                    const daysRemaining = moment(db.expiryDate).diff(moment(), 'days');
+                    let expiryClass = '';
+                    
+                    if (daysRemaining < 0) {
+                      expiryClass = 'text-danger';
+                    } else if (daysRemaining < 7) {
+                      expiryClass = 'text-warning';
+                    }
+                  %>
+                  <span class="<%= expiryClass %>"><%= moment(db.expiryDate).format('DD MMM YYYY') %></span>
+                </td>
+                <td>
+                  <% if(db.isActive && daysRemaining >= 0) { %>
+                    <span class="badge bg-success">Active</span>
+                  <% } else if(db.isActive && daysRemaining < 0) { %>
+                    <span class="badge bg-danger">Expired</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Inactive</span>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="btn-group">
+                    <a href="/admin/databases/<%= db.id %>" class="btn btn-sm btn-outline-primary">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                  </div>
+                  
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5">
+        <i class="fas fa-database fa-4x text-muted mb-3"></i>
+        <h4>No Databases Found</h4>
+        <p class="text-muted">No databases found in the system.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Create Database Modal -->
+<div class="modal fade" id="createDatabaseModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create New Database</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="/admin/databases/create" method="POST" id="createDatabaseForm">
+          <div class="mb-3">
+            <label for="userId" class="form-label">Select User</label>
+            <select class="form-select" id="userId" name="userId" required>
+              <option value="" selected disabled>Select a user</option>
+              <!-- This would be populated with actual user data from the backend -->
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="domain" class="form-label">Domain</label>
+            <input type="text" class="form-control" id="domain" name="domain" placeholder="e.g. hospital.com" required>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="host" class="form-label">Host</label>
+              <input type="text" class="form-control" id="host" name="host" value="localhost">
+            </div>
+            <div class="col-md-6">
+              <label for="port" class="form-label">Port</label>
+              <input type="number" class="form-control" id="port" name="port" value="3306">
+            </div>
+          </div>
+          
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> The system will automatically generate a unique database name and credentials.
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" form="createDatabaseForm" class="btn btn-primary">Create Database</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Fetch users for dropdown
+    fetch('/api/users')
+      .then(response => response.json())
+      .then(users => {
+        const userSelect = document.getElementById('userId');
+        users.forEach(user => {
+          const option = document.createElement('option');
+          option.value = user.id;
+          option.textContent = `${user.fullName} (${user.email})`;
+          userSelect.appendChild(option);
+        });
+      })
+      .catch(error => console.error('Error fetching users:', error));
+  });
+</script>

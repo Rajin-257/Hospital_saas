@@ -1,0 +1,263 @@
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <h2 class="h4 fw-bold"><%= user.fullName %></h2>
+    <p class="text-muted mb-0">Executive user details</p>
+  </div>
+  <div>
+    <a href="/admin/users" class="btn btn-outline-primary">
+      <i class="fas fa-arrow-left me-2"></i> Back to Users
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- User Information -->
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">User Information</h5>
+          <span class="badge <%= user.isActive ? 'bg-success' : 'bg-danger' %>">
+            <%= user.isActive ? 'Active' : 'Inactive' %>
+          </span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="text-center mb-4">
+          <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+            <%= user.fullName.charAt(0).toUpperCase() %>
+          </div>
+          <h5 class="mb-0"><%= user.fullName %></h5>
+          <p class="text-muted"><%= user.role %></p>
+        </div>
+
+        <form action="/admin/users/<%= user.id %>" method="POST">
+          <div class="mb-3">
+            <label for="fullName" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="fullName" name="fullName" value="<%= user.fullName %>" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="phone" class="form-label">Phone Number</label>
+            <input type="text" class="form-control" id="phone" name="phone" value="<%= user.phone %>" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="commissionRate" class="form-label">Commission Rate (%)</label>
+            <input type="number" class="form-control" id="commissionRate" name="commissionRate" value="<%= user.commissionRate %>" min="0" max="100" step="0.01" required>
+          </div>
+          
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="isActive" name="isActive" <%= user.isActive ? 'checked' : '' %>>
+              <label class="form-check-label" for="isActive">Account Active</label>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="role" class="form-label">Role</label>
+            <select name="role" id="role" class="form-control">
+              <option value="user">User</option>
+              <option value="executive">Executive</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i> Update User
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="card-footer bg-white py-3 border-top">
+        <div class="d-flex justify-content-between">
+          <small class="text-muted">Registered: <%= moment(user.createdAt).format('DD MMM YYYY') %></small>
+          <small class="text-muted">Last Login: <%= user.lastLogin ? moment(user.lastLogin).format('DD MMM YYYY') : 'Never' %></small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Databases & Payments -->
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Databases</h5>
+      </div>
+      <div class="card-body p-0">
+        <% if(databases.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Name</th>
+                  <th>Domain</th>
+                  <th>Created</th>
+                  <th>Expiry</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% databases.forEach(db => { %>
+                  <tr>
+                    <td><%= db.name %></td>
+                    <td><%= db.domain %></td>
+                    <td><%= moment(db.createdAt).format('DD MMM YYYY') %></td>
+                    <td><%= moment(db.expiryDate).format('DD MMM YYYY') %></td>
+                    <td>
+                      <% if(db.isActive && moment(db.expiryDate).isAfter(moment())) { %>
+                        <span class="badge bg-success">Active</span>
+                      <% } else if(db.isActive && moment(db.expiryDate).isBefore(moment())) { %>
+                        <span class="badge bg-danger">Expired</span>
+                      <% } else { %>
+                        <span class="badge bg-secondary">Inactive</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/admin/databases/<%= db.id %>" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye"></i> View
+                      </a>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-4">
+            <i class="fas fa-database fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No databases found for this user</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Payment History</h5>
+      </div>
+      <div class="card-body p-0">
+        <% if(payments.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Database</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% payments.forEach(payment => { %>
+                  <tr>
+                    <td><%= payment.database.domain %></td>
+                    <td>৳<%= parseFloat(payment.amount).toLocaleString() %></td>
+                    <td><%= moment(payment.paymentDate).format('DD MMM YYYY') %></td>
+                    <td><%= payment.paymentMethod %></td>
+                    <td>
+                      <% if(payment.status === 'completed') { %>
+                        <span class="badge bg-success">Completed</span>
+                      <% } else if(payment.status === 'pending') { %>
+                        <span class="badge bg-warning">Pending</span>
+                      <% } else if(payment.status === 'failed') { %>
+                        <span class="badge bg-danger">Failed</span>
+                      <% } else { %>
+                        <span class="badge bg-secondary">Refunded</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-4">
+            <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No payment records found</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Commissions & Referrals</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="mb-3">Earned Commissions</h6>
+            <% if(commissions.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                  <thead>
+                    <tr>
+                      <th>Referred User</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% commissions.forEach(commission => { %>
+                      <tr>
+                        <td><%= commission.referredUser.fullName %></td>
+                        <td>৳<%= parseFloat(commission.amount).toLocaleString() %></td>
+                        <td>
+                          <% if(commission.status === 'paid') { %>
+                            <span class="badge bg-success">Paid</span>
+                          <% } else if(commission.status === 'pending') { %>
+                            <span class="badge bg-warning">Pending</span>
+                          <% } else { %>
+                            <span class="badge bg-danger">Cancelled</span>
+                          <% } %>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <p class="text-muted">No commissions earned yet</p>
+            <% } %>
+          </div>
+          <div class="col-md-6">
+            <h6 class="mb-3">Referrals</h6>
+            <% if(referrals.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Email</th>
+                      <th>Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% referrals.forEach(referral => { %>
+                      <tr>
+                        <td><%= referral.fullName %></td>
+                        <td><%= referral.email %></td>
+                        <td><%= moment(referral.createdAt).format('DD MMM YYYY') %></td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <p class="text-muted">No referrals yet</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

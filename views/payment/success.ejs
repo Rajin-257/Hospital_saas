@@ -1,0 +1,40 @@
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm text-center">
+      <div class="card-body py-5">
+        <div class="mb-4">
+          <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+            <i class="fas fa-check-circle fa-4x"></i>
+          </div>
+        </div>
+        
+        <h2 class="h3 fw-bold mb-3">Payment Successful!</h2>
+        <p class="text-muted mb-4">Your database subscription has been extended successfully.</p>
+        
+        <div class="bg-light p-4 rounded mb-4">
+          <div class="row text-start">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <p class="text-muted mb-1">Transaction ID</p>
+              <p class="fw-bold mb-0">#<%= typeof payment !== 'undefined' ? payment.transactionId : 'TRX-XXXXXXXX' %></p>
+            </div>
+            <div class="col-md-6">
+              <p class="text-muted mb-1">Amount Paid</p>
+              <p class="fw-bold mb-0">৳<%= typeof payment !== 'undefined' ? parseFloat(payment.amount).toLocaleString() : '1,000' %></p>
+            </div>
+          </div>
+        </div>
+        
+        <p class="mb-4">A confirmation email has been sent to your registered email address.</p>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+          <a href="/payment/history" class="btn btn-outline-primary">
+            <i class="fas fa-history me-2"></i> Payment History
+          </a>
+          <a href="/database/list" class="btn btn-primary">
+            <i class="fas fa-database me-2"></i> My Databases
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

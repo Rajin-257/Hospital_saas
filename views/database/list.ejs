@@ -1,0 +1,107 @@
+<div class="mb-4">
+  <h2 class="h4 fw-bold">My Databases</h2>
+  <p class="text-muted">Manage your hospital databases</p>
+</div>
+
+<% if(databases.length > 0) { %>
+  <div class="row g-4">
+    <% databases.forEach(database => { %>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><%= database.domain %></h5>
+              <% 
+                const daysRemaining = moment(database.expiryDate).diff(moment(), 'days');
+                let statusBadgeClass = 'bg-success';
+                let statusText = 'Active';
+                
+                if(!database.isActive) {
+                  statusBadgeClass = 'bg-danger';
+                  statusText = 'Inactive';
+                } else if(daysRemaining < 0) {
+                  statusBadgeClass = 'bg-danger';
+                  statusText = 'Expired';
+                } else if(daysRemaining < 7) {
+                  statusBadgeClass = 'bg-warning';
+                  statusText = 'Expiring Soon';
+                }
+              %>
+              <span class="badge <%= statusBadgeClass %>"><%= statusText %></span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <p class="text-muted mb-1">Created On</p>
+                <p class="fw-bold mb-0"><%= moment(database.createdAt).format('DD MMM YYYY') %></p>
+              </div>
+              <div class="col-md-4">
+                <p class="text-muted mb-1">Expiry Date</p>
+                <p class="fw-bold mb-0"><%= moment(database.expiryDate).format('DD MMM YYYY') %></p>
+              </div>
+              <div class="col-md-4">
+                <p class="text-muted mb-1">Time Remaining</p>
+                <% if(daysRemaining < 0) { %>
+                  <p class="fw-bold text-danger mb-0">Expired</p>
+                <% } else { %>
+                  <p class="fw-bold mb-0"><%= daysRemaining %> days</p>
+                <% } %>
+              </div>
+            </div>
+            
+          </div>
+          <div class="card-footer bg-white border-0 pt-0">
+            <div class="row g-2">
+              <div class="col-md-6">
+                <a href="/database/details/<%= database.id %>" class="btn btn-outline-primary w-100">
+                  <i class="fas fa-info-circle me-2"></i> View Details
+                </a>
+              </div>
+              <div class="col-md-6">
+                <a href="/payment/subscription?databaseId=<%= database.id %>" class="btn btn-primary w-100">
+                  <i class="fas fa-sync-alt me-2"></i> Extend Subscription
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5">
+      <i class="fas fa-database fa-4x text-muted mb-3"></i>
+      <h4>No Databases Found</h4>
+      <p class="text-muted">You don't have any databases yet.</p>
+    </div>
+  </div>
+<% } %>
+
+<script>
+  function togglePassword(id) {
+    const passwordField = document.getElementById(`password-${id}`);
+    const eyeIcon = document.getElementById(`eye-${id}`);
+    
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text';
+      eyeIcon.classList.remove('fa-eye');
+      eyeIcon.classList.add('fa-eye-slash');
+    } else {
+      passwordField.type = 'password';
+      eyeIcon.classList.remove('fa-eye-slash');
+      eyeIcon.classList.add('fa-eye');
+    }
+  }
+  
+  function copyToClipboard(button) {
+    const input = button.parentElement.querySelector('input');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    
+    // Show tooltip or alert
+    alert('Copied to clipboard!');
+  }
+</script>

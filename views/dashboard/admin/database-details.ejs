@@ -1,0 +1,439 @@
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <h2 class="h4 fw-bold">Database Details</h2>
+    <p class="text-muted mb-0"><%= database.name %> - <%= database.domain %></p>
+  </div>
+  <div>
+    <a href="/admin/databases" class="btn btn-outline-primary">
+      <i class="fas fa-arrow-left me-2"></i> Back to Databases
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Database Information -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Database Information</h5>
+          <% 
+            const daysRemaining = moment(database.expiryDate).diff(moment(), 'days');
+            let statusBadgeClass = 'bg-success';
+            let statusText = 'Active';
+            
+            if(!database.isActive) {
+              statusBadgeClass = 'bg-danger';
+              statusText = 'Inactive';
+            } else if(daysRemaining < 0) {
+              statusBadgeClass = 'bg-danger';
+              statusText = 'Expired';
+            } else if(daysRemaining < 7) {
+              statusBadgeClass = 'bg-warning';
+              statusText = 'Expiring Soon';
+            }
+          %>
+          <span class="badge <%= statusBadgeClass %>"><%= statusText %></span>
+        </div>
+      </div>
+      <div class="card-body">
+        <form action="/admin/databases/<%= database.id %>" method="POST">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="domain" class="form-label">Domain</label>
+              <input type="text" class="form-control" id="domain" name="domain" value="<%= database.domain %>" readonly>
+            </div>
+            <div class="col-md-6">
+              <label for="name" class="form-label">Database Name</label>
+              <input type="text" class="form-control" id="name" value="<%= database.name %>" readonly>
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="host" class="form-label">Host</label>
+              <input type="text" class="form-control" id="host" name="host" value="<%= database.host %>" required>
+            </div>
+            <div class="col-md-6">
+              <label for="port" class="form-label">Port</label>
+              <input type="number" class="form-control" id="port" name="port" value="<%= database.port %>" required>
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" name="username" value="<%= database.username %>" readonly>
+            </div>
+            <div class="col-md-6">
+              <label for="password" class="form-label">Password</label>
+              <div class="input-group">
+                <input type="password" class="form-control" id="password" name="password" value="<%= database.password %>">
+                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                  <i class="fas fa-eye" id="eyeIcon"></i>
+                </button>
+              </div>
+              <small class="text-muted">Warning: Changing the password will update it in the actual MySQL database</small>
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="expiryDate" class="form-label">Expiry Date</label>
+              <input type="date" class="form-control" id="expiryDate" name="expiryDate" value="<%= moment(database.expiryDate).format('YYYY-MM-DD') %>" required>
+            </div>
+            <div class="col-md-6">
+              <label for="type" class="form-label">Type</label>
+              <input type="text" class="form-control" id="type" value="<%= database.type %>" readonly>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="isActive" name="isActive" <%= database.isActive ? 'checked' : '' %>>
+              <label class="form-check-label" for="isActive">Database Active</label>
+            </div>
+          </div>
+          
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i> Update Database
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="card-footer bg-white py-3 border-top">
+        <div class="d-flex justify-content-between">
+          <small class="text-muted">Created: <%= moment(database.createdAt).format('DD MMM YYYY') %></small>
+          <small class="text-muted">Last Accessed: <%= database.lastAccessed ? moment(database.lastAccessed).format('DD MMM YYYY HH:mm') : 'Never' %></small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Owner & Payments Information -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Owner Information</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+            <%= database.user.fullName.charAt(0).toUpperCase() %>
+          </div>
+          <div>
+            <h6 class="mb-0"><%= database.user.fullName %></h6>
+            <p class="text-muted mb-0"><%= database.user.email %></p>
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p class="text-muted mb-1">Phone</p>
+            <p class="mb-0"><%= database.user.phone %></p>
+          </div>
+          <div class="col-md-6">
+            <p class="text-muted mb-1">Commission Rate</p>
+            <p class="mb-0"><%= database.user.commissionRate %>%</p>
+          </div>
+        </div>
+        
+        <a href="/admin/users/<%= database.user.id %>" class="btn btn-outline-primary">
+          <i class="fas fa-user me-2"></i> View User Profile
+        </a>
+      </div>
+    </div>
+    
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Payment History</h5>
+      </div>
+      <div class="card-body p-0">
+        <% if(payments.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Method</th>
+                  <th>Transaction ID</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% payments.forEach(payment => { %>
+                  <tr>
+                    <td>৳<%= parseFloat(payment.amount).toLocaleString() %></td>
+                    <td><%= moment(payment.paymentDate).format('DD MMM YYYY') %></td>
+                    <td><%= payment.paymentMethod %></td>
+                    <td><%= payment.transactionId %></td>
+                    <td>
+                      <% if(payment.status === 'completed') { %>
+                        <span class="badge bg-success">Completed</span>
+                      <% } else if(payment.status === 'pending') { %>
+                        <span class="badge bg-warning">Pending</span>
+                      <% } else if(payment.status === 'failed') { %>
+                        <span class="badge bg-danger">Failed</span>
+                      <% } else { %>
+                        <span class="badge bg-secondary">Refunded</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-4">
+            <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No payment records found</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Database Management Tools -->
+<div class="card border-0 shadow-sm mt-4">
+  <div class="card-header bg-white py-3">
+    <h5 class="mb-0">Database Management Tools</h5>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card bg-light">
+          <div class="card-body text-center p-4">
+            <i class="fas fa-sync-alt fa-3x text-primary mb-3"></i>
+            <h5>Extend Expiry</h5>
+            <p class="mb-3">Extend the database subscription period</p>
+            <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#extendModal">
+              Extend Subscription
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="col-md-4">
+        <div class="card bg-light">
+          <div class="card-body text-center p-4">
+            <i class="fas fa-database fa-3x text-success mb-3"></i>
+            <h5>Backup Database</h5>
+            <p class="mb-3">Create a backup of the database</p>
+            <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#backupModal">
+              Create Backup
+            </button>
+          </div>
+        </div>
+      </div> -->
+      <div class="col-md-4">
+        <div class="card bg-light">
+          <div class="card-body text-center p-4">
+            <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+            <h5>Delete Database</h5>
+            <p class="mb-3">Permanently delete this database</p>
+            <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
+              Delete Database
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Extend Subscription Modal -->
+<div class="modal fade" id="extendModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Extend Subscription</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="extendForm">
+          <div class="mb-3">
+            <label for="extensionDays" class="form-label">Extension Period (days)</label>
+            <input type="number" class="form-control" id="extensionDays" name="extensionDays" value="30" min="1" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Current Expiry Date</label>
+            <input type="text" class="form-control" value="<%= moment(database.expiryDate).format('DD MMM YYYY') %>" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">New Expiry Date</label>
+            <input type="text" class="form-control" id="newExpiryDate" value="<%= moment(database.expiryDate).add(30, 'days').format('DD MMM YYYY') %>" readonly>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmExtend">Extend Subscription</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backup Modal -->
+<!-- <div class="modal fade" id="backupModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Database Backup</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Create a backup of the database <strong><%= database.name %></strong>.</p>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="includeData" checked>
+          <label class="form-check-label" for="includeData">
+            Include data (not just structure)
+          </label>
+        </div>
+        <div class="progress" style="display: none;">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" id="confirmBackup">Create Backup</button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the database <strong><%= database.name %></strong>?</p>
+        <p class="text-danger fw-bold">Warning: This action will permanently delete the database and all its data. This action cannot be undone.</p>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="confirmDelete">
+          <label class="form-check-label" for="confirmDelete">
+            I understand that this action is irreversible
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form action="/admin/databases/<%= database.id %>?_method=DELETE" method="POST">
+          <button type="submit" class="btn btn-danger" id="deleteButton" disabled>Delete Database</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    
+    togglePassword.addEventListener('click', () => {
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+      } else {
+        passwordField.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+      }
+    });
+    
+    // Calculate new expiry date when extension days change
+    const extensionDaysInput = document.getElementById('extensionDays');
+    const newExpiryDateInput = document.getElementById('newExpiryDate');
+    const currentExpiryDate = new Date('<%= database.expiryDate %>');
+    
+    extensionDaysInput.addEventListener('input', () => {
+      const days = parseInt(extensionDaysInput.value) || 0;
+      const newDate = new Date(currentExpiryDate);
+      newDate.setDate(newDate.getDate() + days);
+      newExpiryDateInput.value = newDate.toLocaleDateString('en-GB', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric' 
+      });
+    });
+    
+    // Enable/disable delete button based on checkbox
+    const confirmDeleteCheckbox = document.getElementById('confirmDelete');
+    const deleteButton = document.getElementById('deleteButton');
+    
+    confirmDeleteCheckbox.addEventListener('change', () => {
+      deleteButton.disabled = !confirmDeleteCheckbox.checked;
+    });
+    
+    // Handle backup creation (simulated)
+    const confirmBackupButton = document.getElementById('confirmBackup');
+    const progressBar = document.querySelector('.progress-bar');
+    const progressContainer = document.querySelector('.progress');
+    
+    confirmBackupButton.addEventListener('click', () => {
+      progressContainer.style.display = 'block';
+      confirmBackupButton.disabled = true;
+      
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = `${progress}%`;
+        progressBar.setAttribute('aria-valuenow', progress);
+        
+        if (progress >= 100) {
+          clearInterval(interval);
+          confirmBackupButton.innerHTML = '<i class="fas fa-check me-2"></i> Backup Complete';
+          setTimeout(() => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('backupModal'));
+            modal.hide();
+            
+            // Reset for next time
+            setTimeout(() => {
+              progressContainer.style.display = 'none';
+              progressBar.style.width = '0%';
+              confirmBackupButton.disabled = false;
+              confirmBackupButton.innerHTML = 'Create Backup';
+            }, 500);
+          }, 1500);
+        }
+      }, 200);
+    });
+    
+    // Handle subscription extension (simulated)
+    const confirmExtendButton = document.getElementById('confirmExtend');
+    
+    confirmExtendButton.addEventListener('click', () => {
+      const days = parseInt(extensionDaysInput.value) || 0;
+      
+      if (days <= 0) {
+        alert('Please enter a valid number of days');
+        return;
+      }
+      
+      confirmExtendButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+      confirmExtendButton.disabled = true;
+      
+      // Simulate API call
+      setTimeout(() => {
+        const expiryDateField = document.getElementById('expiryDate');
+        const newDate = new Date(currentExpiryDate);
+        newDate.setDate(newDate.getDate() + days);
+        
+        // Update form field
+        expiryDateField.value = newDate.toISOString().split('T')[0];
+        
+        // Submit the form
+        document.querySelector('form').submit();
+      }, 1500);
+    });
+  });
+</script>

@@ -1,0 +1,121 @@
+<nav id="sidebarMenu" class="d-md-block sidebar collapse" style="height: calc(100vh - 56px); overflow-y: auto;">
+  <div class="position-sticky pt-3">
+    <% if (user && user.role === 'admin') { %>
+      <!-- Admin Sidebar -->
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span>Admin Dashboard</span>
+      </h6>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/dashboard">
+            <i class="bi bi-speedometer2 me-2"></i>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/users">
+            <i class="bi bi-people me-2"></i>
+            User Management
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/databases">
+            <i class="bi bi-hdd-network me-2"></i>
+            Database Management
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/payments">
+            <i class="bi bi-credit-card me-2"></i>
+            Payment Management
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/commissions">
+            <i class="bi bi-cash-coin me-2"></i>
+            Commission Management
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/reports">
+            <i class="bi bi-file-earmark-bar-graph me-2"></i>
+            Reports
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/settings">
+            <i class="bi bi-gear me-2"></i>
+            Settings
+          </a>
+        </li>
+      </ul>
+      
+    <% } else if (user && user.role === 'executive') { %>
+      <!-- Executive Sidebar -->
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span>Executive Dashboard</span>
+      </h6>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="/executive/dashboard">
+            <i class="bi bi-speedometer2 me-2"></i>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/executive/commissions">
+            <i class="bi bi-cash-coin me-2"></i>
+            Commission History
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/executive/referrals">
+            <i class="bi bi-diagram-3 me-2"></i>
+            My Referrals
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/database/list">
+            <i class="bi bi-hdd-network me-2"></i>
+            My Databases
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/payment/history">
+            <i class="bi bi-credit-card me-2"></i>
+            Payment History
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/executive/profile">
+            <i class="bi bi-person me-2"></i>
+            My Profile
+          </a>
+        </li>
+      </ul>
+      
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span>Quick Actions</span>
+      </h6>
+      <ul class="nav flex-column mb-2">
+        <li class="nav-item">
+          <a class="nav-link" href="/payment/subscription">
+            <i class="bi bi-arrow-repeat me-2"></i>
+            Extend Subscription
+          </a>
+        </li>
+      </ul>
+    <% } %>
+    
+    <!-- Logout Option for All Users -->
+    <hr class="my-3">
+    <ul class="nav flex-column mb-2">
+      <li class="nav-item">
+        <a class="nav-link text-danger" href="/logout">
+          <i class="bi bi-box-arrow-right me-2"></i>
+          Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>

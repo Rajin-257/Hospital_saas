@@ -1,0 +1,287 @@
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+      <h2 class="h4 fw-bold">Commission History</h2>
+      <p class="text-muted mb-0">View and manage your commission earnings</p>
+    </div>
+    <div class="d-flex gap-2">
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+          <i class="fas fa-filter me-1"></i> Filter
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+          <li><a class="dropdown-item <%= filter.status === 'all' ? 'active' : '' %>" href="/executive/commissions">All Commissions</a></li>
+          <li><a class="dropdown-item <%= filter.status === 'pending' ? 'active' : '' %>" href="/executive/commissions?status=pending">Pending</a></li>
+          <li><a class="dropdown-item <%= filter.status === 'paid' ? 'active' : '' %>" href="/executive/commissions?status=paid">Paid</a></li>
+          <li><a class="dropdown-item <%= filter.status === 'cancelled' ? 'active' : '' %>" href="/executive/commissions?status=cancelled">Cancelled</a></li>
+        </ul>
+      </div>
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="periodDropdown" data-bs-toggle="dropdown">
+          <i class="fas fa-calendar-alt me-1"></i> Period
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="periodDropdown">
+          <li><a class="dropdown-item <%= filter.period === 'all' ? 'active' : '' %>" href="/executive/commissions">All Time</a></li>
+          <li><a class="dropdown-item <%= filter.period === 'today' ? 'active' : '' %>" href="/executive/commissions?period=today">Today</a></li>
+          <li><a class="dropdown-item <%= filter.period === 'week' ? 'active' : '' %>" href="/executive/commissions?period=week">This Week</a></li>
+          <li><a class="dropdown-item <%= filter.period === 'month' ? 'active' : '' %>" href="/executive/commissions?period=month">This Month</a></li>
+          <li><a class="dropdown-item <%= filter.period === 'year' ? 'active' : '' %>" href="/executive/commissions?period=year">This Year</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Stats Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 bg-primary bg-gradient text-white p-3 rounded">
+              <i class="fas fa-hand-holding-usd fa-2x"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <h6 class="text-muted mb-0">Total Commission</h6>
+              <h3 class="fw-bold mb-0">৳<%= totalAmount.toLocaleString() %></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 bg-success bg-gradient text-white p-3 rounded">
+              <i class="fas fa-check-circle fa-2x"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <h6 class="text-muted mb-0">Paid</h6>
+              <h3 class="fw-bold mb-0">৳<%= commissions.filter(c => c.status === 'paid').reduce((sum, c) => sum + parseFloat(c.amount), 0).toLocaleString() %></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 bg-warning bg-gradient text-white p-3 rounded">
+              <i class="fas fa-clock fa-2x"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <h6 class="text-muted mb-0">Pending</h6>
+              <h3 class="fw-bold mb-0">৳<%= commissions.filter(c => c.status === 'pending').reduce((sum, c) => sum + parseFloat(c.amount), 0).toLocaleString() %></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 bg-danger bg-gradient text-white p-3 rounded">
+              <i class="fas fa-times-circle fa-2x"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <h6 class="text-muted mb-0">Cancelled</h6>
+              <h3 class="fw-bold mb-0">৳<%= commissions.filter(c => c.status === 'cancelled').reduce((sum, c) => sum + parseFloat(c.amount), 0).toLocaleString() %></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Commission History Table -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Commission History</h5>
+        <div class="d-flex gap-2">
+          <form action="/executive/commissions" method="GET" class="d-flex">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Search commissions..." name="search">
+              <button class="btn btn-outline-primary" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <% if(commissions.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th>Referred User</th>
+                <th>Payment</th>
+                <th>Database</th>
+                <th>Amount</th>
+                <th>Rate</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% commissions.forEach(commission => { %>
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                        <%= commission.referredUser.fullName.charAt(0).toUpperCase() %>
+                      </div>
+                      <div>
+                        <h6 class="mb-0"><%= commission.referredUser.fullName %></h6>
+                        <small class="text-muted"><%= commission.referredUser.email %></small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>৳<%= parseFloat(commission.payment.amount).toLocaleString() %></td>
+                  <td><%= commission.payment.database.domain %></td>
+                  <td>৳<%= parseFloat(commission.amount).toLocaleString() %></td>
+                  <td><%= commission.percentage %>%</td>
+                  <td><%= moment(commission.createdAt).format('DD MMM YYYY') %></td>
+                  <td>
+                    <% if(commission.status === 'paid') { %>
+                      <span class="badge bg-success">Paid</span>
+                    <% } else if(commission.status === 'pending') { %>
+                      <span class="badge bg-warning">Pending</span>
+                    <% } else { %>
+                      <span class="badge bg-danger">Cancelled</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5">
+          <i class="fas fa-hand-holding-usd fa-4x text-muted mb-3"></i>
+          <h4>No Commissions Found</h4>
+          <p class="text-muted">No commission records found for the selected criteria</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+  
+  <!-- Commission Chart -->
+  <div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white py-3">
+      <h5 class="mb-0">Commission Trends</h5>
+    </div>
+    <div class="card-body">
+      <canvas id="commissionChart" height="300"></canvas>
+    </div>
+  </div>
+  
+  <!-- Commission Policy -->
+  <div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white py-3">
+      <h5 class="mb-0">Commission Policy</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-4">
+            <h6 class="mb-3">How Commissions Work</h6>
+            <ul class="mb-0">
+              <li class="mb-2">You earn a <%= commissions.length > 0 ? commissions[0].percentage : 10 %>% commission on all payments made by your referrals</li>
+              <li class="mb-2">Commissions are calculated automatically when a payment is made</li>
+              <li class="mb-2">Pending commissions are reviewed and approved by the admin</li>
+              <li class="mb-2">Approved commissions are paid according to the payment schedule</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h6 class="mb-3">Payment Schedule</h6>
+            <ul class="mb-0">
+              <li class="mb-2">Commissions are paid on a monthly basis</li>
+              <li class="mb-2">Payment will be made within the first 10 days of the month</li>
+              <li class="mb-2">Minimum payout amount is ৳500</li>
+              <li class="mb-2">Commissions below the minimum amount will be carried forward to the next month</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-4">
+            <h6 class="mb-3">Payment Methods</h6>
+            <ul class="mb-0">
+              <li class="mb-2">bKash</li>
+              <li class="mb-2">Nagad</li>
+              <li class="mb-2">Bank Transfer</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h6 class="mb-3">Contact Information</h6>
+            <p class="mb-2">For any commission related queries, please contact:</p>
+            <ul class="mb-0">
+              <li class="mb-2">Email: <a href="mailto:commissions@dbms.com">commissions@dbms.com</a></li>
+              <li class="mb-2">Phone: +880 1XXXXXXXXX</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Commission Trend Chart
+      const ctx = document.getElementById('commissionChart').getContext('2d');
+      
+      // Sample data - would come from backend in a real app
+      const last6Months = Array.from({length: 6}, (_, i) => {
+        const month = new Date();
+        month.setMonth(month.getMonth() - i);
+        return month.toLocaleString('default', { month: 'short' });
+      }).reverse();
+      
+      const commissionData = [
+        `<%= Array.from({length: 6}, () => Math.floor(Math.random() * 5000) + 1000).join(',') %>`
+      ];
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: last6Months,
+          datasets: [{
+            label: 'Commission Amount (BDT)',
+            data: commissionData,
+            backgroundColor: 'rgba(13, 110, 253, 0.6)',
+            borderColor: 'rgba(13, 110, 253, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '৳' + value.toLocaleString();
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'Commission: ৳' + context.raw.toLocaleString();
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>

@@ -1,0 +1,149 @@
+<div class="mb-4">
+  <h2 class="h4 fw-bold">Extend Subscription</h2>
+  <p class="text-muted">Extend your database subscription period</p>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Database Information</h5>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p class="text-muted mb-1">Domain</p>
+            <p class="fw-bold mb-0"><%= database.domain %></p>
+          </div>
+          <div class="col-md-6">
+            <p class="text-muted mb-1">Database Name</p>
+            <p class="fw-bold mb-0"><%= database.name %></p>
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p class="text-muted mb-1">Current Expiry Date</p>
+            <p class="fw-bold mb-0"><%= moment(database.expiryDate).format('DD MMM YYYY') %></p>
+          </div>
+          <div class="col-md-6">
+            <p class="text-muted mb-1">Time Remaining</p>
+            <% if(daysRemaining < 0) { %>
+              <p class="fw-bold text-danger mb-0">Expired</p>
+            <% } else { %>
+              <p class="fw-bold mb-0"><%= daysRemaining %> days</p>
+            <% } %>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <p class="text-muted mb-1">Status</p>
+            <% if(database.isActive) { %>
+              <span class="badge bg-success">Active</span>
+            <% } else { %>
+              <span class="badge bg-danger">Inactive</span>
+            <% } %>
+          </div>
+          <div class="col-md-6">
+            <p class="text-muted mb-1">Type</p>
+            <span class="badge bg-<%= database.type === 'paid' ? 'primary' : 'secondary' %>">
+              <%= database.type.charAt(0).toUpperCase() + database.type.slice(1) %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Subscription Details</h5>
+      </div>
+      <div class="card-body">
+        <div class="mb-4">
+          <div class="mb-3">
+            <span class="text-muted">Standard Subscription Plan</span>
+            <h4 class="fw-bold">30 Days Extension</h4>
+          </div>
+          
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span>Subscription Fee</span>
+            <span class="fw-bold">৳<%= subscriptionPrice.toLocaleString() %></span>
+          </div>
+          
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span>VAT & Tax</span>
+            <span class="fw-bold">৳0</span>
+          </div>
+          
+          <hr>
+          
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="fw-bold">Total Amount</span>
+            <span class="fw-bold">৳<%= subscriptionPrice.toLocaleString() %></span>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <p class="text-muted mb-1">New Expiry Date After Extension</p>
+          <p class="fw-bold mb-0">
+            <%= moment(daysRemaining < 0 ? new Date() : database.expiryDate).add(30, 'days').format('DD MMM YYYY') %>
+          </p>
+        </div>
+        
+        <a href="/payment/checkout?databaseId=<%= database.id %>" class="btn btn-primary w-100 mt-3">
+          <i class="fas fa-credit-card me-2"></i> Proceed to Payment
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Payment Information</h5>
+      </div>
+      <div class="card-body">
+        <div class="bg-light p-3 rounded mb-4">
+          <h6 class="mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Subscription Benefits</h6>
+          <ul class="mb-0">
+            <li class="mb-2">Access to hospital database system</li>
+            <li class="mb-2">Technical support & maintenance</li>
+            <li class="mb-2">Security updates & monitoring</li>
+            <li>Data backup & recovery services</li>
+          </ul>
+        </div>
+        
+        <div class="bg-light p-3 rounded">
+          <h6 class="mb-3"><i class="fas fa-shield-alt me-2 text-primary"></i>Secure Payment</h6>
+          <p class="mb-3">We accept the following payment methods:</p>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <img src="/img/bkash.png" alt="bKash" height="30">
+            <img src="/img/nagad.png" alt="Nagad" height="30">
+            <img src="/img/rocket.png" alt="Rocket" height="30">
+            <img src="/img/visa.png" alt="Visa" height="30">
+            <img src="/img/mastercard.png" alt="Mastercard" height="30">
+          </div>
+          <p class="mb-0 small">All payments are processed securely through our payment gateway.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Need Help?</h5>
+      </div>
+      <div class="card-body">
+        <p class="mb-3">If you have any questions about your subscription, please contact our support team.</p>
+        <div class="d-flex align-items-center mb-3">
+          <i class="fas fa-envelope text-primary me-2"></i>
+          <span>support@dbms.com</span>
+        </div>
+        <div class="d-flex align-items-center">
+          <i class="fas fa-phone text-primary me-2"></i>
+          <span>+880 1XXXXXXXXX</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

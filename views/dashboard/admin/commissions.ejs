@@ -1,0 +1,256 @@
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <h2 class="h4 fw-bold">Commission Management</h2>
+    <p class="text-muted mb-0">Manage referral commissions for executives</p>
+  </div>
+  <div class="d-flex gap-2">
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+        <i class="fas fa-filter me-1"></i> Filter
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+        <li><a class="dropdown-item" href="/admin/commissions">All Commissions</a></li>
+        <li><a class="dropdown-item" href="/admin/commissions?status=pending">Pending</a></li>
+        <li><a class="dropdown-item" href="/admin/commissions?status=paid">Paid</a></li>
+        <li><a class="dropdown-item" href="/admin/commissions?status=cancelled">Cancelled</a></li>
+      </ul>
+    </div>
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="executiveDropdown" data-bs-toggle="dropdown">
+        <i class="fas fa-user me-1"></i> Executive
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="executiveDropdown">
+        <li><a class="dropdown-item" href="/admin/commissions">All Executives</a></li>
+        <% executives.forEach(executive => { %>
+          <li><a class="dropdown-item" href="/admin/commissions?executive=<%= executive.id %>"><%= executive.fullName %></a></li>
+        <% }); %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-primary bg-gradient text-white p-3 rounded">
+            <i class="fas fa-hand-holding-usd fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Commissions</h6>
+            <h3 class="fw-bold mb-0">৳<%= commissions.reduce((sum, commission) => sum + parseFloat(commission.amount), 0).toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-success bg-gradient text-white p-3 rounded">
+            <i class="fas fa-check-circle fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Paid Commissions</h6>
+            <h3 class="fw-bold mb-0">৳<%= commissions.filter(c => c.status === 'paid').reduce((sum, commission) => sum + parseFloat(commission.amount), 0).toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-warning bg-gradient text-white p-3 rounded">
+            <i class="fas fa-clock fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Pending Commissions</h6>
+            <h3 class="fw-bold mb-0">৳<%= commissions.filter(c => c.status === 'pending').reduce((sum, commission) => sum + parseFloat(commission.amount), 0).toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-danger bg-gradient text-white p-3 rounded">
+            <i class="fas fa-times-circle fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Cancelled</h6>
+            <h3 class="fw-bold mb-0">৳<%= commissions.filter(c => c.status === 'cancelled').reduce((sum, commission) => sum + parseFloat(commission.amount), 0).toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">All Commissions</h5>
+      <div class="d-flex gap-2">
+        <form action="/admin/commissions" method="GET" class="d-flex">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search commissions..." name="search">
+            <button class="btn btn-outline-primary" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <% if(commissions.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th scope="col">Executive</th>
+              <th scope="col">Referred User</th>
+              <th scope="col">Payment</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Rate</th>
+              <th scope="col">Date</th>
+              <th scope="col">Status</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% commissions.forEach(commission => { %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                      <%= commission.executive.fullName.charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                      <h6 class="mb-0"><%= commission.executive.fullName %></h6>
+                      <small class="text-muted"><%= commission.executive.email %></small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="bg-secondary rounded-circle text-white d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                      <%= commission.referredUser.fullName.charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                      <h6 class="mb-0"><%= commission.referredUser.fullName %></h6>
+                      <small class="text-muted"><%= commission.referredUser.email %></small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <h6 class="mb-0">৳<%= parseFloat(commission.payment.amount).toLocaleString() %></h6>
+                    <small class="text-muted">
+                      <%= commission.payment.database.domain %> · <%= moment(commission.payment.paymentDate).format('DD MMM YYYY') %>
+                    </small>
+                  </div>
+                </td>
+                <td>৳<%= parseFloat(commission.amount).toLocaleString() %></td>
+                <td><%= commission.percentage %>%</td>
+                <td><%= moment(commission.createdAt).format('DD MMM YYYY') %></td>
+                <td>
+                  <% if(commission.status === 'paid') { %>
+                    <span class="badge bg-success">Paid</span>
+                  <% } else if(commission.status === 'pending') { %>
+                    <span class="badge bg-warning">Pending</span>
+                  <% } else { %>
+                    <span class="badge bg-danger">Cancelled</span>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="actionDropdown<%= commission.id %>" data-bs-toggle="dropdown">
+                      Actions
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="actionDropdown<%= commission.id %>">
+                      <% if(commission.status === 'pending') { %>
+                        <li>
+                          <form action="/admin/commissions/<%= commission.id %>" method="POST">
+                            <input type="hidden" name="status" value="paid">
+                            <button type="submit" class="dropdown-item text-success">Mark as Paid</button>
+                          </form>
+                        </li>
+                        <li>
+                          <form action="/admin/commissions/<%= commission.id %>" method="POST">
+                            <input type="hidden" name="status" value="cancelled">
+                            <button type="submit" class="dropdown-item text-danger">Cancel</button>
+                          </form>
+                        </li>
+                      <% } else if(commission.status === 'paid') { %>
+                        <li>
+                          <form action="/admin/commissions/<%= commission.id %>" method="POST">
+                            <input type="hidden" name="status" value="pending">
+                            <button type="submit" class="dropdown-item text-warning">Mark as Pending</button>
+                          </form>
+                        </li>
+                      <% } else { %>
+                        <li>
+                          <form action="/admin/commissions/<%= commission.id %>" method="POST">
+                            <input type="hidden" name="status" value="pending">
+                            <button type="submit" class="dropdown-item text-warning">Reactivate</button>
+                          </form>
+                        </li>
+                      <% } %>
+                      <li><a class="dropdown-item" href="/admin/users/<%= commission.executive.id %>">View Executive</a></li>
+                      <li><a class="dropdown-item" href="/admin/users/<%= commission.referredUser.id %>">View Referred User</a></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5">
+        <i class="fas fa-hand-holding-usd fa-4x text-muted mb-3"></i>
+        <h4>No Commissions Found</h4>
+        <p class="text-muted">No commission records found in the system.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Pay All Pending Modal -->
+<div class="modal fade" id="payAllModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Pay All Pending Commissions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to mark all pending commissions as paid?</p>
+        <p>This will update the status of <%= commissions.filter(c => c.status === 'pending').length %> commission records.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form action="/admin/commissions/pay-all" method="POST">
+          <button type="submit" class="btn btn-success">Pay All Pending</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Batch Action Button -->
+<% if(commissions.filter(c => c.status === 'pending').length > 0) { %>
+  <div class="text-end mt-4">
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#payAllModal">
+      <i class="fas fa-money-bill-wave me-2"></i> Pay All Pending Commissions
+    </button>
+  </div>
+<% } %>

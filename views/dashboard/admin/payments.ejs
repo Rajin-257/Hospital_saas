@@ -1,0 +1,380 @@
+<div class="mb-4 d-flex justify-content-between align-items-center">
+  <div>
+    <h2 class="h4 fw-bold">Payment Management</h2>
+    <p class="text-muted mb-0">Manage all payment transactions in the system</p>
+  </div>
+  <div class="d-flex gap-2">
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+        <i class="fas fa-filter me-1"></i> Filter
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+        <li><a class="dropdown-item" href="/admin/payments">All Payments</a></li>
+        <li><a class="dropdown-item" href="/admin/payments?status=completed">Completed</a></li>
+        <li><a class="dropdown-item" href="/admin/payments?status=pending">Pending</a></li>
+        <li><a class="dropdown-item" href="/admin/payments?status=failed">Failed</a></li>
+        <li><a class="dropdown-item" href="/admin/payments?status=refunded">Refunded</a></li>
+      </ul>
+    </div>
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="periodDropdown" data-bs-toggle="dropdown">
+        <i class="fas fa-calendar-alt me-1"></i> Period
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="periodDropdown">
+        <li><a class="dropdown-item" href="/admin/payments">All Time</a></li>
+        <li><a class="dropdown-item" href="/admin/payments?period=today">Today</a></li>
+        <li><a class="dropdown-item" href="/admin/payments?period=week">This Week</a></li>
+        <li><a class="dropdown-item" href="/admin/payments?period=month">This Month</a></li>
+        <li><a class="dropdown-item" href="/admin/payments?period=year">This Year</a></li>
+      </ul>
+    </div>
+    <a href="/admin/reports" class="btn btn-primary">
+      <i class="fas fa-chart-bar me-2"></i> Generate Report
+    </a>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-primary bg-gradient text-white p-3 rounded">
+            <i class="fas fa-money-bill-wave fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Revenue</h6>
+            <h3 class="fw-bold mb-0">৳<%= payments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0).toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-success bg-gradient text-white p-3 rounded">
+            <i class="fas fa-check-circle fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Completed</h6>
+            <h3 class="fw-bold mb-0"><%= payments.filter(p => p.status === 'completed').length %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-warning bg-gradient text-white p-3 rounded">
+            <i class="fas fa-clock fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Pending</h6>
+            <h3 class="fw-bold mb-0"><%= payments.filter(p => p.status === 'pending').length %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-danger bg-gradient text-white p-3 rounded">
+            <i class="fas fa-times-circle fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Failed/Refunded</h6>
+            <h3 class="fw-bold mb-0"><%= payments.filter(p => p.status === 'failed' || p.status === 'refunded').length %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Payment Transactions</h5>
+      <div class="d-flex gap-2">
+        <form action="/admin/payments" method="GET" class="d-flex">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search transactions..." name="search">
+            <button class="btn btn-outline-primary" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <% if(payments.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th scope="col">Transaction ID</th>
+              <th scope="col">User</th>
+              <th scope="col">Database</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Date</th>
+              <th scope="col">Method</th>
+              <th scope="col">Status</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payments.forEach(payment => { %>
+              <tr>
+                <td><%= payment.transactionId %></td>
+                <td>
+                  <a href="/admin/users/<%= payment.user.id %>" class="text-decoration-none">
+                    <%= payment.user.fullName %>
+                  </a>
+                </td>
+                <td>
+                  <a href="/admin/databases/<%= payment.database.id %>" class="text-decoration-none">
+                    <%= payment.database.domain %>
+                  </a>
+                </td>
+                <td>৳<%= parseFloat(payment.amount).toLocaleString() %></td>
+                <td><%= moment(payment.paymentDate).format('DD MMM YYYY') %></td>
+                <td><%= payment.paymentMethod %></td>
+                <td>
+                  <% if(payment.status === 'completed') { %>
+                    <span class="badge bg-success">Completed</span>
+                  <% } else if(payment.status === 'pending') { %>
+                    <span class="badge bg-warning">Pending</span>
+                  <% } else if(payment.status === 'failed') { %>
+                    <span class="badge bg-danger">Failed</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Refunded</span>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="actionDropdown<%= payment.id %>" data-bs-toggle="dropdown">
+                      Actions
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="actionDropdown<%= payment.id %>">
+                      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewModal<%= payment.id %>">View Details</a></li>
+                      <% if(payment.status === 'pending') { %>
+                        <li><a class="dropdown-item text-success" href="#" data-bs-toggle="modal" data-bs-target="#approveModal<%= payment.id %>">Approve</a></li>
+                        <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#rejectModal<%= payment.id %>">Reject</a></li>
+                      <% } else if(payment.status === 'completed') { %>
+                        <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#refundModal<%= payment.id %>">Refund</a></li>
+                      <% } %>
+                    </ul>
+                  </div>
+                  
+                  <!-- View Modal -->
+                  <div class="modal fade" id="viewModal<%= payment.id %>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Payment Details</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="row mb-3">
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Transaction ID</p>
+                              <p class="fw-bold mb-0"><%= payment.transactionId %></p>
+                            </div>
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Status</p>
+                              <% if(payment.status === 'completed') { %>
+                                <span class="badge bg-success">Completed</span>
+                              <% } else if(payment.status === 'pending') { %>
+                                <span class="badge bg-warning">Pending</span>
+                              <% } else if(payment.status === 'failed') { %>
+                                <span class="badge bg-danger">Failed</span>
+                              <% } else { %>
+                                <span class="badge bg-secondary">Refunded</span>
+                              <% } %>
+                            </div>
+                          </div>
+                          
+                          <div class="row mb-3">
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">User</p>
+                              <p class="fw-bold mb-0"><%= payment.user.fullName %></p>
+                            </div>
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Email</p>
+                              <p class="fw-bold mb-0"><%= payment.user.email %></p>
+                            </div>
+                          </div>
+                          
+                          <div class="row mb-3">
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Database</p>
+                              <p class="fw-bold mb-0"><%= payment.database.name %></p>
+                            </div>
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Domain</p>
+                              <p class="fw-bold mb-0"><%= payment.database.domain %></p>
+                            </div>
+                          </div>
+                          
+                          <div class="row mb-3">
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Amount</p>
+                              <p class="fw-bold mb-0">৳<%= parseFloat(payment.amount).toLocaleString() %></p>
+                            </div>
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Payment Date</p>
+                              <p class="fw-bold mb-0"><%= moment(payment.paymentDate).format('DD MMM YYYY HH:mm') %></p>
+                            </div>
+                          </div>
+                          
+                          <div class="row mb-3">
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Payment Method</p>
+                              <p class="fw-bold mb-0"><%= payment.paymentMethod %></p>
+                            </div>
+                            <div class="col-md-6">
+                              <p class="text-muted mb-1">Extension Days</p>
+                              <p class="fw-bold mb-0"><%= payment.extensionDays %> days</p>
+                            </div>
+                          </div>
+                          
+                          <% if(payment.referralCommission) { %>
+                            <div class="row mb-3">
+                              <div class="col-md-6">
+                                <p class="text-muted mb-1">Referral Commission</p>
+                                <p class="fw-bold mb-0">৳<%= parseFloat(payment.referralCommission).toLocaleString() %></p>
+                              </div>
+                              <div class="col-md-6">
+                                <p class="text-muted mb-1">Referred By</p>
+                                <p class="fw-bold mb-0">
+                                  <a href="/admin/users/<%= payment.referredById %>" class="text-decoration-none">
+                                    View Executive
+                                  </a>
+                                </p>
+                              </div>
+                            </div>
+                          <% } %>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Approve Modal -->
+                  <% if(payment.status === 'pending') { %>
+                    <div class="modal fade" id="approveModal<%= payment.id %>" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Approve Payment</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>Are you sure you want to approve payment <strong><%= payment.transactionId %></strong>?</p>
+                            <p>This will mark the payment as completed and extend the database subscription.</p>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="/admin/payments/<%= payment.id %>/approve" method="POST">
+                              <button type="submit" class="btn btn-success">Approve Payment</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                  
+                  <!-- Reject Modal -->
+                  <% if(payment.status === 'pending') { %>
+                    <div class="modal fade" id="rejectModal<%= payment.id %>" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Reject Payment</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>Are you sure you want to reject payment <strong><%= payment.transactionId %></strong>?</p>
+                            <p>This will mark the payment as failed.</p>
+                            <div class="mb-3">
+                              <label for="rejectReason<%= payment.id %>" class="form-label">Reason for Rejection</label>
+                              <textarea class="form-control" id="rejectReason<%= payment.id %>" name="reason" rows="3" required></textarea>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="/admin/payments/<%= payment.id %>/reject" method="POST">
+                              <input type="hidden" name="reason" id="rejectReasonInput<%= payment.id %>">
+                              <button type="submit" class="btn btn-danger" onclick="setRejectReason('<%= payment.id %>')">Reject Payment</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                  
+                  <!-- Refund Modal -->
+                  <% if(payment.status === 'completed') { %>
+                    <div class="modal fade" id="refundModal<%= payment.id %>" tabindex="-1" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Refund Payment</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>Are you sure you want to refund payment <strong><%= payment.transactionId %></strong>?</p>
+                            <p class="text-danger">This will mark the payment as refunded and may affect the database subscription.</p>
+                            <div class="mb-3">
+                              <label for="refundReason<%= payment.id %>" class="form-label">Reason for Refund</label>
+                              <textarea class="form-control" id="refundReason<%= payment.id %>" name="reason" rows="3" required></textarea>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="/admin/payments/<%= payment.id %>/refund" method="POST">
+                              <input type="hidden" name="reason" id="refundReasonInput<%= payment.id %>">
+                              <button type="submit" class="btn btn-danger" onclick="setRefundReason('<%= payment.id %>')">Refund Payment</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5">
+        <i class="fas fa-file-invoice-dollar fa-4x text-muted mb-3"></i>
+        <h4>No Payments Found</h4>
+        <p class="text-muted">No payment records found in the system.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  function setRejectReason(id) {
+    const reason = document.getElementById(`rejectReason${id}`).value;
+    document.getElementById(`rejectReasonInput${id}`).value = reason;
+  }
+  
+  function setRefundReason(id) {
+    const reason = document.getElementById(`refundReason${id}`).value;
+    document.getElementById(`refundReasonInput${id}`).value = reason;
+  }
+</script>

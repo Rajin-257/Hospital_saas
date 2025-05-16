@@ -1,0 +1,207 @@
+<div class="mb-4">
+  <h2 class="h4 fw-bold">Admin Dashboard</h2>
+  <p class="text-muted">Overview of system performance and key metrics</p>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-primary bg-gradient text-white p-3 rounded">
+            <i class="fas fa-users fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Executives</h6>
+            <h3 class="fw-bold mb-0"><%= totalUsers %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-success bg-gradient text-white p-3 rounded">
+            <i class="fas fa-database fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Active Databases</h6>
+            <h3 class="fw-bold mb-0"><%= activeDatabases %> / <%= totalDatabases %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-info bg-gradient text-white p-3 rounded">
+            <i class="fas fa-money-bill-wave fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Revenue</h6>
+            <h3 class="fw-bold mb-0">৳<%= totalRevenue.toLocaleString() %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0 bg-warning bg-gradient text-white p-3 rounded">
+            <i class="fas fa-credit-card fa-2x"></i>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-0">Total Payments</h6>
+            <h3 class="fw-bold mb-0"><%= totalPayments %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Recent Payments -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Recent Payments</h5>
+          <a href="/admin/payments" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+      </div>
+      <div class="card-body">
+        <% if(recentPayments.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Database</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentPayments.forEach(payment => { %>
+                  <tr>
+                    <td>
+                      <a href="/admin/users/<%= payment.user.id %>" class="text-decoration-none">
+                        <%= payment.user.fullName %>
+                      </a>
+                    </td>
+                    <td>
+                      <a href="/admin/databases/<%= payment.database.id %>" class="text-decoration-none">
+                        <%= payment.database.domain %>
+                      </a>
+                    </td>
+                    <td>৳<%= parseFloat(payment.amount).toLocaleString() %></td>
+                    <td><%= moment(payment.paymentDate).format('DD MMM YYYY') %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-4">
+            <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No recent payments found</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expiring Databases -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Databases Expiring Soon</h5>
+          <a href="/admin/databases" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+      </div>
+      <div class="card-body">
+        <% if(expiringDatabases.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Domain</th>
+                  <th>Owner</th>
+                  <th>Expiry Date</th>
+                  <th>Days Left</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% expiringDatabases.forEach(db => { %>
+                  <tr>
+                    <td>
+                      <a href="/admin/databases/<%= db.id %>" class="text-decoration-none">
+                        <%= db.domain %>
+                      </a>
+                    </td>
+                    <td>
+                      <a href="/admin/users/<%= db.user.id %>" class="text-decoration-none">
+                        <%= db.user.fullName %>
+                      </a>
+                    </td>
+                    <td><%= moment(db.expiryDate).format('DD MMM YYYY') %></td>
+                    <td>
+                      <span class="badge bg-warning">
+                        <%= moment(db.expiryDate).diff(moment(), 'days') %> days
+                      </span>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-center py-4">
+            <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No databases expiring soon</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card border-0 shadow-sm mt-4">
+  <div class="card-header bg-white py-3">
+    <h5 class="mb-0">Quick Actions</h5>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <a href="/admin/users" class="btn btn-light btn-lg w-100 d-flex align-items-center justify-content-center p-3">
+          <i class="fas fa-users me-2"></i> Manage Users
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="/admin/databases" class="btn btn-light btn-lg w-100 d-flex align-items-center justify-content-center p-3">
+          <i class="fas fa-database me-2"></i> Manage Databases
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="/admin/payments" class="btn btn-light btn-lg w-100 d-flex align-items-center justify-content-center p-3">
+          <i class="fas fa-credit-card me-2"></i> View Payments
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="/admin/reports" class="btn btn-light btn-lg w-100 d-flex align-items-center justify-content-center p-3">
+          <i class="fas fa-chart-bar me-2"></i> Generate Reports
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
