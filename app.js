@@ -6,10 +6,6 @@ const flash = require('connect-flash');
 const methodOverride = require('method-override');
 const expressLayouts = require('express-ejs-layouts');
 
-// Import logger
-const logger = require('./utils/logger');
-const requestLogger = require('./middleware/requestLogger');
-
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -23,9 +19,6 @@ const { isAuthenticated } = require('./middleware/auth');
 // Initialize app
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Request logging middleware
-app.use(requestLogger);
 
 // Configure view engine
 app.set('view engine', 'ejs');
@@ -83,13 +76,7 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  logger.error('Unhandled error:', { 
-    error: err.message,
-    stack: err.stack,
-    url: req.url,
-    method: req.method,
-    userId: req.session?.user?.id || 'anonymous'
-  });
+  console.error(err.stack);
   res.status(500).render('errors/500', { title: '500 Server Error' });
 });
 
@@ -101,21 +88,17 @@ require('./models/associations');
 
 db.authenticate()
   .then(() => {
-    logger.info('Database connection has been established successfully.');
+    console.log('Database connection has been established successfully.');
     // Sync all models
     return db.sync({ alter: false });
   })
   .then(() => {
-    logger.info('All models were synchronized successfully.');
+    console.log('All models were synchronized successfully.');
     // Start server
     app.listen(PORT, () => {
-      logger.info(`Server is running on port ${PORT}`);
+      console.log(`Server is running on port ${PORT}`);
     });
   })
   .catch(err => {
-    logger.error('Unable to connect to the database:', { 
-      error: err.message,
-      stack: err.stack 
-    });
-    process.exit(1);
+    console.error('Unable to connect to the database:', err);
   });
