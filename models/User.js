@@ -58,6 +58,10 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true
   },
+  storedPassword:{
+    type:DataTypes.TEXT,
+    allowNull:true
+  },
   commissionRate: {
     type: DataTypes.FLOAT,
     defaultValue: 0, // Percentage

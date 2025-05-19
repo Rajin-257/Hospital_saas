@@ -117,3 +117,31 @@ exports.sendCommissionEmail = async (executive, commission, payment) => {
 
   return await transporter.sendMail(mailOptions);
 };
+
+// Send executive credentials email
+exports.sendExecutiveCredentialsEmail = async (user, password) => {
+  const mailOptions = {
+    from: `"DB Management System" <${process.env.MAIL_FROM || 'noreply@dbms.com'}>`,
+    to: user.email,
+    subject: 'Your Executive Account Credentials',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #333; text-align: center;">Executive Account Credentials</h2>
+        <p>Hello ${user.fullName},</p>
+        <p>Your account has been upgraded to Executive status. Here are your login credentials:</p>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <h3 style="color: #333; margin-top: 0;">Account Information</h3>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Password:</strong> ${password}</p>
+        </div>
+        
+        <p>For security reasons, please change your password after logging in.</p>
+        
+        <p style="margin-top: 30px;">Best regards,<br>DB Management System Team</p>
+      </div>
+    `
+  };
+
+  return await transporter.sendMail(mailOptions);
+};

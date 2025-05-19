@@ -59,7 +59,10 @@ app.use('/', authRoutes);
 app.use('/admin', isAuthenticated, adminRoutes);
 app.use('/executive', isAuthenticated, executiveRoutes);
 app.use('/database', isAuthenticated, databaseRoutes);
-app.use('/payment', isAuthenticated, paymentRoutes);
+
+// Special handling for payment routes - some require auth, others don't
+app.use('/payment/public', paymentRoutes); // Public payment routes don't require auth
+app.use('/payment', isAuthenticated, paymentRoutes); // Protected payment routes
 
 // Landing page route
 app.get('/', (req, res) => {
@@ -86,14 +89,18 @@ const db = require('./config/database');
 // Import model associations
 require('./models/associations');
 
+const createInitialAdmin = require('./config/initAdmin');
+
 db.authenticate()
   .then(() => {
     console.log('Database connection has been established successfully.');
     // Sync all models
-    return db.sync({ alter: false });
+    //return db.sync({ force: true });
   })
-  .then(() => {
+  .then(async () => {
     console.log('All models were synchronized successfully.');
+    // Create initial admin account
+    //await createInitialAdmin();
     // Start server
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

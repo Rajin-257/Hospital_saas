@@ -1,0 +1,292 @@
+<div class="mb-4">
+  <h2 class="h4 fw-bold">Checkout</h2>
+  <p class="text-muted">Complete your payment to extend database subscription</p>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Select Payment Method</h5>
+      </div>
+      <div class="card-body">
+        <form action="/payment/process" method="POST" id="paymentForm">
+          <input type="hidden" name="databaseId" value="<%= database.id %>">
+          <input type="hidden" name="amount" value="<%= amount %>">
+          <input type="hidden" name="transactionId" value="<%= transactionId %>">
+          
+          <div class="row mb-4">
+            <% paymentMethods.forEach((method, index) => { %>
+              <div class="col-md-3 mb-3">
+                <div class="form-check payment-method-card">
+                  <input class="form-check-input" type="radio" name="paymentMethod" id="<%= method.id %>" value="<%= method.id %>" <%= index === 0 ? 'checked' : '' %>>
+                  <label class="form-check-label d-block text-center p-3 border rounded" for="<%= method.id %>">
+                    <img src="/img/<%= method.icon %>" alt="<%= method.name %>" class="img-fluid mb-2" style="max-height: 40px;">
+                    <span class="d-block"><%= method.name %></span>
+                  </label>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+          
+          <div id="bkashForm" class="payment-form">
+            <div class="mb-4">
+              <h5 class="h6 mb-3">bKash Payment Instructions</h5>
+              <ol>
+                <li class="mb-2">Go to your bKash app or dial *247#</li>
+                <li class="mb-2">Select "Payment" option</li>
+                <li class="mb-2">Enter merchant number: <strong>01XXXXXXXXX</strong></li>
+                <li class="mb-2">Enter amount: <strong>৳<%= amount.toLocaleString() %></strong></li>
+                <li class="mb-2">Enter reference: <strong><%= transactionId %></strong></li>
+                <li>Complete payment with your PIN</li>
+              </ol>
+            </div>
+            
+            <div class="mb-3">
+              <label for="bkashNumber" class="form-label">bKash Number</label>
+              <input type="text" class="form-control" id="bkashNumber" name="bkashNumber" placeholder="01XXXXXXXXX" required>
+            </div>
+            <div class="mb-3">
+              <label for="bkashTrxID" class="form-label">Transaction ID</label>
+              <input type="text" class="form-control" id="bkashTrxID" name="bkashTrxID" placeholder="TrxID from bKash SMS" required>
+            </div>
+          </div>
+          
+          <div id="nagadForm" class="payment-form d-none">
+            <div class="mb-4">
+              <h5 class="h6 mb-3">Nagad Payment Instructions</h5>
+              <ol>
+                <li class="mb-2">Go to your Nagad app or dial *167#</li>
+                <li class="mb-2">Select "Payment" option</li>
+                <li class="mb-2">Enter merchant number: <strong>01XXXXXXXXX</strong></li>
+                <li class="mb-2">Enter amount: <strong>৳<%= amount.toLocaleString() %></strong></li>
+                <li class="mb-2">Enter reference: <strong><%= transactionId %></strong></li>
+                <li>Complete payment with your PIN</li>
+              </ol>
+            </div>
+            
+            <div class="mb-3">
+              <label for="nagadNumber" class="form-label">Nagad Number</label>
+              <input type="text" class="form-control" id="nagadNumber" name="nagadNumber" placeholder="01XXXXXXXXX">
+            </div>
+            <div class="mb-3">
+              <label for="nagadTrxID" class="form-label">Transaction ID</label>
+              <input type="text" class="form-control" id="nagadTrxID" name="nagadTrxID" placeholder="TrxID from Nagad SMS">
+            </div>
+          </div>
+          
+          <div id="rocketForm" class="payment-form d-none">
+            <div class="mb-4">
+              <h5 class="h6 mb-3">Rocket Payment Instructions</h5>
+              <ol>
+                <li class="mb-2">Go to your Rocket mobile menu or dial *322#</li>
+                <li class="mb-2">Select "Payment" option</li>
+                <li class="mb-2">Enter merchant number: <strong>01XXXXXXXXX</strong></li>
+                <li class="mb-2">Enter amount: <strong>৳<%= amount.toLocaleString() %></strong></li>
+                <li class="mb-2">Enter reference: <strong><%= transactionId %></strong></li>
+                <li>Complete payment with your PIN</li>
+              </ol>
+            </div>
+            
+            <div class="mb-3">
+              <label for="rocketNumber" class="form-label">Rocket Number</label>
+              <input type="text" class="form-control" id="rocketNumber" name="rocketNumber" placeholder="01XXXXXXXXX">
+            </div>
+            <div class="mb-3">
+              <label for="rocketTrxID" class="form-label">Transaction ID</label>
+              <input type="text" class="form-control" id="rocketTrxID" name="rocketTrxID" placeholder="TrxID from Rocket SMS">
+            </div>
+          </div>
+          
+          <div id="cardForm" class="payment-form d-none">
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <label for="cardNumber" class="form-label">Card Number</label>
+                <input type="text" class="form-control" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="expiryDate" class="form-label">Expiry Date</label>
+                <input type="text" class="form-control" id="expiryDate" name="expiryDate" placeholder="MM/YY">
+              </div>
+              <div class="col-md-6">
+                <label for="cvv" class="form-label">CVV</label>
+                <input type="text" class="form-control" id="cvv" name="cvv" placeholder="123">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="cardholderName" class="form-label">Cardholder Name</label>
+              <input type="text" class="form-control" id="cardholderName" name="cardholderName" placeholder="John Doe">
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="yourName" class="form-label">Your Name</label>
+            <input type="text" class="form-control" id="yourName" name="yourName" placeholder="Enter your full name" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="yourEmail" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="yourEmail" name="yourEmail" placeholder="Enter your email address" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-100 mt-4">
+            <i class="fas fa-lock me-2"></i> Complete Payment
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Order Summary</h5>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <p class="text-muted mb-1">Database</p>
+          <p class="fw-bold mb-0"><%= database.domain %></p>
+        </div>
+        
+        <div class="mb-3">
+          <p class="text-muted mb-1">Plan</p>
+          <p class="fw-bold mb-0">30 Days Extension</p>
+        </div>
+        
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span>Subscription Fee</span>
+          <span class="fw-bold">৳<%= amount.toLocaleString() %></span>
+        </div>
+        
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span>VAT & Tax</span>
+          <span class="fw-bold">৳0</span>
+        </div>
+        
+        <hr>
+        
+        <div class="d-flex align-items-center justify-content-between">
+          <span class="fw-bold">Total Amount</span>
+          <span class="fw-bold">৳<%= amount.toLocaleString() %></span>
+        </div>
+        
+        <div class="mt-3">
+          <div class="bg-light p-3 rounded">
+            <div class="d-flex align-items-center mb-2">
+              <i class="fas fa-receipt me-2 text-primary"></i>
+              <span class="fw-bold">Transaction ID</span>
+            </div>
+            <p class="mb-0"><%= transactionId %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Need Help?</h5>
+      </div>
+      <div class="card-body">
+        <p class="mb-3">If you have any issues with payment, please contact our support team.</p>
+        <div class="d-flex align-items-center mb-3">
+          <i class="fas fa-envelope text-primary me-2"></i>
+          <span>support@dbms.com</span>
+        </div>
+        <div class="d-flex align-items-center">
+          <i class="fas fa-phone text-primary me-2"></i>
+          <span>+880 1XXXXXXXXX</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
+    const paymentForms = document.querySelectorAll('.payment-form');
+    
+    // Show/hide payment forms based on selected method
+    paymentMethods.forEach(method => {
+      method.addEventListener('change', function() {
+        paymentForms.forEach(form => {
+          form.classList.add('d-none');
+        });
+        
+        const selectedForm = document.getElementById(`${this.value}Form`);
+        if (selectedForm) {
+          selectedForm.classList.remove('d-none');
+        }
+      });
+    });
+    
+    // Form validation
+    const paymentForm = document.getElementById('paymentForm');
+    paymentForm.addEventListener('submit', function(event) {
+      const selectedMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      
+      let isValid = true;
+      let errorMessage = '';
+      
+      // Validate name and email
+      const yourName = document.getElementById('yourName').value;
+      const yourEmail = document.getElementById('yourEmail').value;
+      
+      if (!yourName || !yourEmail) {
+        isValid = false;
+        errorMessage = 'Please enter your name and email address';
+      }
+      
+      switch (selectedMethod) {
+        case 'bkash':
+          const bkashNumber = document.getElementById('bkashNumber').value;
+          const bkashTrxID = document.getElementById('bkashTrxID').value;
+          
+          if (!bkashNumber || !bkashTrxID) {
+            isValid = false;
+            errorMessage = 'Please enter your bKash number and Transaction ID';
+          }
+          break;
+          
+        case 'nagad':
+          const nagadNumber = document.getElementById('nagadNumber').value;
+          const nagadTrxID = document.getElementById('nagadTrxID').value;
+          
+          if (!nagadNumber || !nagadTrxID) {
+            isValid = false;
+            errorMessage = 'Please enter your Nagad number and Transaction ID';
+          }
+          break;
+          
+        case 'rocket':
+          const rocketNumber = document.getElementById('rocketNumber').value;
+          const rocketTrxID = document.getElementById('rocketTrxID').value;
+          
+          if (!rocketNumber || !rocketTrxID) {
+            isValid = false;
+            errorMessage = 'Please enter your Rocket number and Transaction ID';
+          }
+          break;
+          
+        case 'card':
+          const cardNumber = document.getElementById('cardNumber').value;
+          const expiryDate = document.getElementById('expiryDate').value;
+          const cvv = document.getElementById('cvv').value;
+          const cardholderName = document.getElementById('cardholderName').value;
+          
+          if (!cardNumber || !expiryDate || !cvv || !cardholderName) {
+            isValid = false;
+            errorMessage = 'Please enter all card details';
+          }
+          break;
+      }
+      
+      if (!isValid) {
+        event.preventDefault();
+        alert(errorMessage);
+      }
+    });
+  });
+</script> 

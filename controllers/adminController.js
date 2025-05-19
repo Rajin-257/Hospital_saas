@@ -5,6 +5,8 @@ const Payment = require('../models/Payment');
 const Commission = require('../models/Commission');
 const { deleteDatabase, updateDatabasePassword } = require('../services/databaseService');
 const moment = require('moment');
+const { sendExecutiveCredentialsEmail } = require('../services/mailService');
+const bcrypt = require('bcrypt');
 
 // Admin Dashboard
 exports.getDashboard = async (req, res) => {
@@ -165,19 +167,41 @@ exports.updateUser = async (req, res) => {
       req.flash('error_msg', 'User not found');
       return res.redirect('/admin/users');
     }
+
+    // Check if role is being changed to executive
+    if (role === 'executive' && user.role !== 'executive') {
+      // Generate a random password
+      const tempPassword = user.storedPassword
+
+      // Update user with new role and password
+      await user.update({
+        fullName,
+        email,
+        phone,
+        commissionRate: parseFloat(commissionRate),
+        isActive: isActive === 'on',
+        role,
+        storedPassword: ''
+      });
+
+      // Send credentials email
+      await sendExecutiveCredentialsEmail(user, tempPassword);
+      
+      req.flash('success_msg', 'User updated and executive credentials sent');
+    } else {
+      // Regular update without password change
+      await user.update({
+        fullName,
+        email,
+        phone,
+        commissionRate: parseFloat(commissionRate),
+        isActive: isActive === 'on',
+        role
+      });
+      
+      req.flash('success_msg', 'User updated successfully');
+    }
     
-    // Update user
-    await user.update({
-      fullName,
-      email,
-      phone,
-      commissionRate: parseFloat(commissionRate),
-      isActive: isActive === 'on',
-      role,
-      moment
-    });
-    
-    req.flash('success_msg', 'User updated successfully');
     res.redirect(`/admin/users/${id}`);
     
   } catch (err) {

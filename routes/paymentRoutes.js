@@ -17,4 +17,6 @@ router.get('/success', paymentController.getPaymentSuccess);
 // Payment history
 router.get('/history', paymentController.getPaymentHistory);
 
+router.get('/public/subscription/:id', paymentController.getPublicCheakout);
+
 module.exports = router;

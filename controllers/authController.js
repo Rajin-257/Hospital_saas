@@ -156,7 +156,6 @@ exports.postRegister = async (req, res) => {
         expectedDomain
       });
     }
-
     // Create new user
     const newUser = await User.create({
       fullName,
@@ -164,6 +163,7 @@ exports.postRegister = async (req, res) => {
       phone,
       password,
       expectedDomain,
+      storedPassword:password,
       referredBy: referringUser.id,
       role: 'user' // Default role for new registrations
     });

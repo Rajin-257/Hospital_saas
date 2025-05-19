@@ -59,6 +59,14 @@ const Payment = sequelize.define('Payment', {
   extensionDays: {
     type: DataTypes.INTEGER,
     defaultValue: 30 // Default subscription period is 30 days
+  },
+  customerName: {
+    type: DataTypes.STRING,
+    allowNull: true // Allow null for payments by registered users
+  },
+  customerEmail: {
+    type: DataTypes.STRING,
+    allowNull: true // Allow null for payments by registered users
   }
 });
 

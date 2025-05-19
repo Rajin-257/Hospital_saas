@@ -104,22 +104,37 @@ exports.getCheckout = async (req, res) => {
 
 // Process payment
 exports.processPayment = async (req, res) => {
-  const { databaseId, amount, paymentMethod, transactionId } = req.body;
-  const userId = req.session.user.id;
+  const { databaseId, amount, paymentMethod, transactionId, yourName, yourEmail } = req.body;
+  let userId;
   
   try {
-    // Get user
-    const user = await User.findByPk(userId);
+    // Check if the request is from a logged-in user or public
+    const isPublicPayment = !!yourName && !!yourEmail;
     
     // Get database
-    const database = await Database.findOne({ 
-      where: { id: databaseId, userId } 
-    });
+    const database = await Database.findByPk(databaseId);
     
     if (!database) {
       req.flash('error_msg', 'Database not found');
       return res.redirect('/payment/subscription');
     }
+    
+    if (isPublicPayment) {
+      // Public payment
+      userId = database.userId; // Use the database owner's ID
+    } else {
+      // Regular user payment
+      userId = req.session.user.id;
+      
+      // Verify the database belongs to the user
+      if (database.userId !== userId) {
+        req.flash('error_msg', 'You do not have permission to extend this database');
+        return res.redirect('/payment/subscription');
+      }
+    }
+    
+    // Get user (database owner)
+    const user = await User.findByPk(userId);
     
     // Create payment record
     const payment = await Payment.create({
@@ -129,7 +144,9 @@ exports.processPayment = async (req, res) => {
       paymentMethod,
       transactionId,
       status: 'completed', // In a real app, this would be 'pending' until verified
-      extensionDays: 30 // 30 days extension
+      extensionDays: 30, // 30 days extension
+      customerName: yourName || user.name,
+      customerEmail: yourEmail || user.email
     });
     
     // Update database expiry
@@ -172,10 +189,15 @@ exports.processPayment = async (req, res) => {
       }
     }
     
-    // Send payment confirmation email
+    // Send payment confirmation email to database owner
     await sendPaymentConfirmationEmail(user, payment, database);
     
-    req.flash('success_msg', 'Payment successful! Your subscription has been extended.');
+    // Also send confirmation to customer if it's a public payment
+    if (isPublicPayment && yourEmail) {
+      await sendPaymentConfirmationEmail({ name: yourName, email: yourEmail }, payment, database);
+    }
+    
+    req.flash('success_msg', 'Payment successful! The subscription has been extended.');
     res.redirect('/payment/success');
     
   } catch (err) {
@@ -187,8 +209,12 @@ exports.processPayment = async (req, res) => {
 
 // Payment success page
 exports.getPaymentSuccess = async (req, res) => {
+  // Check if user is logged in
+  const user = req.session && req.session.user ? req.session.user : null;
+  
   res.render('payment/success', {
-    title: 'Payment Successful'
+    title: 'Payment Successful',
+    user
   });
 };
 
@@ -225,4 +251,47 @@ exports.updatePaymentSettings = async (req, res) => {
   
   req.flash('success_msg', 'Payment settings updated successfully');
   res.redirect('/admin/settings');
+};
+
+// Public checkout page with database ID from external sources
+exports.getPublicCheakout = async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    // Get database by ID
+    const database = await Database.findByPk(id);
+    
+    if (!database) {
+      return res.status(404).render('errors/404', {
+        title: 'Database Not Found',
+        message: 'The requested database could not be found.'
+      });
+    }
+    
+    // Get database owner
+    const user = await User.findByPk(database.userId);
+    
+    // Get price (default 1000 BDT)
+    const amount = 1000;
+    
+    res.render('payment/public-checkout', {
+      title: 'Checkout',
+      database,
+      amount,
+      transactionId: `TRX-${uuidv4().substring(0, 8).toUpperCase()}`,
+      paymentMethods: [
+        { id: 'bkash', name: 'bKash', icon: 'bkash.png' },
+        { id: 'nagad', name: 'Nagad', icon: 'nagad.png' },
+        { id: 'rocket', name: 'Rocket', icon: 'rocket.png' },
+        { id: 'card', name: 'Credit/Debit Card', icon: 'card.png' }
+      ]
+    });
+    
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('errors/500', {
+      title: 'Server Error',
+      message: 'There was an error processing your request.'
+    });
+  }
 };
